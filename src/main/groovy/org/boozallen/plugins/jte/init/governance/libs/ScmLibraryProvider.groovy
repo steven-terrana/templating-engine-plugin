@@ -25,12 +25,18 @@ import org.boozallen.plugins.jte.init.primitives.injectors.StepWrapperFactory
 import org.boozallen.plugins.jte.util.FileSystemWrapper
 import org.boozallen.plugins.jte.util.TemplateLogger
 import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
+import org.kohsuke.stapler.DataBoundConstructor
 import org.kohsuke.stapler.DataBoundSetter
 
 class ScmLibraryProvider extends LibraryProvider{
 
     SCM scm
     String baseDir
+
+    // jenkins requires this be here
+    @SuppressWarnings('UnnecessaryConstructor')
+    @DataBoundConstructor
+    ScmLibraryProvider(){}
 
     @DataBoundSetter
     void setBaseDir(String baseDir) {

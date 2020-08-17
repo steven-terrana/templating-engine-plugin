@@ -34,9 +34,9 @@ class LibraryLoader extends TemplatePrimitiveInjector {
         // 1. Inject steps from loaded libraries
         WorkflowJob job = flowOwner.run().getParent()
         List<GovernanceTier> tiers = GovernanceTier.getHierarchy(job)
-        List<LibrarySource> libs = tiers.collectMany{ tier ->
+        List<LibrarySource> libs = tiers.collect{ tier ->
             tier.getLibrarySources()
-        } - null
+        }.flatten() - null
         List<LibraryProvider> providers = libs.collect{ libSource ->
             libSource.getLibraryProvider()
         } - null

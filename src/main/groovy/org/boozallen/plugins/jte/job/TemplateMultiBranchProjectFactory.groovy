@@ -29,11 +29,17 @@ import jenkins.scm.api.SCMSourceCriteria
 import org.jenkinsci.plugins.workflow.cps.Snippetizer
 import org.jenkinsci.plugins.workflow.multibranch.AbstractWorkflowBranchProjectFactory
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject
+import org.kohsuke.stapler.DataBoundConstructor
 import org.kohsuke.stapler.DataBoundSetter
 
 class TemplateMultiBranchProjectFactory extends MultiBranchProjectFactory.BySCMSourceCriteria {
 
     Boolean filterBranches
+
+    // jenkins requires this be here
+    @SuppressWarnings('UnnecessaryConstructor')
+    @DataBoundConstructor
+    TemplateMultiBranchProjectFactory(){}
 
     Object readResolve() {
         if (this.filterBranches == null) {

@@ -24,6 +24,7 @@ import org.boozallen.plugins.jte.init.dsl.PipelineConfigurationObject
 import org.boozallen.plugins.jte.util.FileSystemWrapper
 import org.boozallen.plugins.jte.util.TemplateLogger
 import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
+import org.kohsuke.stapler.DataBoundConstructor
 import org.kohsuke.stapler.DataBoundSetter
 
 class ScmPipelineConfigurationProvider extends PipelineConfigurationProvider{
@@ -32,6 +33,11 @@ class ScmPipelineConfigurationProvider extends PipelineConfigurationProvider{
     static final String PIPELINE_TEMPLATE_DIRECTORY = "pipeline_templates"
     String baseDir
     SCM scm
+
+    // jenkins requires this be here
+    @SuppressWarnings('UnnecessaryConstructor')
+    @DataBoundConstructor
+    ScmPipelineConfigurationProvider(){}
 
     @DataBoundSetter
     void setBaseDir(String _baseDir){

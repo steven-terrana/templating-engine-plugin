@@ -19,6 +19,7 @@ import hudson.Extension
 import hudson.Util
 import hudson.model.AbstractDescribableImpl
 import hudson.model.Descriptor
+import org.kohsuke.stapler.DataBoundConstructor
 import org.kohsuke.stapler.DataBoundSetter
 
 class ConsolePipelineTemplate extends AbstractDescribableImpl<ConsolePipelineTemplate> implements Serializable{
@@ -26,6 +27,11 @@ class ConsolePipelineTemplate extends AbstractDescribableImpl<ConsolePipelineTem
     private static final long serialVersionUID = 1L
     String name
     String template
+
+    // Jenkins requires this be here
+    @SuppressWarnings('UnnecessaryConstructor')
+    @DataBoundConstructor
+    ConsolePipelineTemplate(){}
 
     @DataBoundSetter
     void setName(String name){

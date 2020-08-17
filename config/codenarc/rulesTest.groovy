@@ -293,7 +293,7 @@ ruleset {
 //    GStringExpressionWithinString
 //    GetterMethodCouldBeProperty
     GroovyLangImmutable
-    UseCollectMany
+//    UseCollectMany
     UseCollectNested
 
     // rulesets/imports.xml

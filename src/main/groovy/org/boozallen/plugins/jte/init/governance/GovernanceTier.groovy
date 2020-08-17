@@ -29,6 +29,7 @@ import org.boozallen.plugins.jte.init.governance.libs.LibraryProvider
 import org.boozallen.plugins.jte.init.governance.libs.LibrarySource
 import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
 import org.jenkinsci.plugins.workflow.job.WorkflowJob
+import org.kohsuke.stapler.DataBoundConstructor
 import org.kohsuke.stapler.DataBoundSetter
 import org.kohsuke.stapler.StaplerRequest
 import hudson.model.Descriptor.FormException
@@ -64,6 +65,11 @@ class GovernanceTier extends AbstractDescribableImpl<GovernanceTier> implements 
         }
         return h
     }
+
+    // jenkins requires this be here
+    @SuppressWarnings('UnnecessaryConstructor')
+    @DataBoundConstructor
+    GovernanceTier(){}
 
     @SuppressWarnings('ParameterReassignment')
     @DataBoundSetter
