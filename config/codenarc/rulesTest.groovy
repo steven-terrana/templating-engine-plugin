@@ -163,11 +163,13 @@ ruleset {
 // doesn't lead to better code
 //    DuplicateStringLiteral
 
-    // rulesets/enhanced.xml
-    CloneWithoutCloneable
-    JUnitAssertEqualsConstantActualValue
-    MissingOverrideAnnotation
-    UnsafeImplementationAsMap
+// rulesets/enhanced.xml
+//    these rules spit out a ton of compilation warnings
+//     investigate here to eventually re-enable: https://github.com/CodeNarc/CodeNarc/issues/123
+//    CloneWithoutCloneable
+//    JUnitAssertEqualsConstantActualValue
+//    MissingOverrideAnnotation
+//    UnsafeImplementationAsMap
 
     // rulesets/exceptions.xml
     CatchArrayIndexOutOfBoundsException
@@ -388,7 +390,7 @@ ruleset {
     // rulesets/size.xml
     AbcMetric   // Requires the GMetrics jar
     ClassSize
-    CrapMetric   // Requires the GMetrics jar and a Cobertura coverage file
+    // CrapMetric   // Requires the GMetrics jar and a Cobertura coverage file
     CyclomaticComplexity   // Requires the GMetrics jar
     MethodCount
     MethodSize
