@@ -19,16 +19,13 @@ import hudson.Extension
 import hudson.Util
 import hudson.model.AbstractDescribableImpl
 import hudson.model.Descriptor
-import org.kohsuke.stapler.DataBoundConstructor
 import org.kohsuke.stapler.DataBoundSetter
 
 class ConsolePipelineTemplate extends AbstractDescribableImpl<ConsolePipelineTemplate> implements Serializable{
 
+    private static final long serialVersionUID = 1L
     String name
     String template
-
-    @DataBoundConstructor
-    ConsolePipelineTemplate(){}
 
     @DataBoundSetter
     void setName(String name){
@@ -50,4 +47,5 @@ class ConsolePipelineTemplate extends AbstractDescribableImpl<ConsolePipelineTem
 
     @Extension
     final static class DescriptorImpl extends Descriptor<ConsolePipelineTemplate> {}
+
 }

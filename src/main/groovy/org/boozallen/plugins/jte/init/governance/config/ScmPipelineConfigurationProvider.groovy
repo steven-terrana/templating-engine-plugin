@@ -24,7 +24,6 @@ import org.boozallen.plugins.jte.init.dsl.PipelineConfigurationObject
 import org.boozallen.plugins.jte.util.FileSystemWrapper
 import org.boozallen.plugins.jte.util.TemplateLogger
 import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
-import org.kohsuke.stapler.DataBoundConstructor
 import org.kohsuke.stapler.DataBoundSetter
 
 class ScmPipelineConfigurationProvider extends PipelineConfigurationProvider{
@@ -34,23 +33,20 @@ class ScmPipelineConfigurationProvider extends PipelineConfigurationProvider{
     String baseDir
     SCM scm
 
-    @DataBoundConstructor
-    ScmPipelineConfigurationProvider(){}
-
     @DataBoundSetter
-    setBaseDir(String baseDir){
-        this.baseDir = Util.fixEmptyAndTrim(baseDir)
+    void setBaseDir(String _baseDir){
+        this.baseDir = Util.fixEmptyAndTrim(_baseDir)
     }
 
     String getBaseDir(){ return baseDir }
 
     @DataBoundSetter
-    setScm(SCM scm){ this.scm = scm }
+    void setScm(SCM _scm){ this.scm = _scm }
 
     SCM getScm(){ return scm }
 
     PipelineConfigurationObject getConfig(FlowExecutionOwner owner){
-        PipelineConfigurationObject configObject
+        PipelineConfigurationObject configObject = null
         if (scm && !(scm instanceof NullSCM)){
             FileSystemWrapper fsw = FileSystemWrapper.createFromSCM(owner, scm)
             String filePath = "${baseDir ? "${baseDir}/" : ""}${CONFIG_FILE}"
@@ -58,7 +54,7 @@ class ScmPipelineConfigurationProvider extends PipelineConfigurationProvider{
             if (configFile){
                 try{
                     configObject = new PipelineConfigurationDsl(owner).parse(configFile)
-                }catch(any){
+                } catch(any){
                     new TemplateLogger(owner.getListener()).printError("Error parsing scm provided pipeline configuration")
                     throw any
                 }
@@ -68,7 +64,7 @@ class ScmPipelineConfigurationProvider extends PipelineConfigurationProvider{
     }
 
     String getJenkinsfile(FlowExecutionOwner owner){
-        String jenkinsfile
+        String jenkinsfile = null
         if(scm && !(scm instanceof NullSCM)){
             FileSystemWrapper fsw = FileSystemWrapper.createFromSCM(owner, scm)
             String filePath = "${baseDir ? "${baseDir}/" : ""}Jenkinsfile"
@@ -78,7 +74,7 @@ class ScmPipelineConfigurationProvider extends PipelineConfigurationProvider{
     }
 
     String getTemplate(FlowExecutionOwner owner, String template){
-        String pipelineTemplate
+        String pipelineTemplate = null
         if(scm && !(scm instanceof NullSCM)){
             FileSystemWrapper fsw = FileSystemWrapper.createFromSCM(owner, scm)
             String filePath = "${baseDir ? "${baseDir}/" : ""}${PIPELINE_TEMPLATE_DIRECTORY}/${template}"
@@ -87,11 +83,11 @@ class ScmPipelineConfigurationProvider extends PipelineConfigurationProvider{
         return pipelineTemplate
     }
 
-
     @Extension
     static class DescriptorImpl extends PipelineConfigurationProvider.PipelineConfigurationProviderDescriptor{
         String getDisplayName(){
             return "From SCM"
         }
     }
+
 }

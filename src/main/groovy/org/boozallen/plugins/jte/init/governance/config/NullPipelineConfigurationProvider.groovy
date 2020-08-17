@@ -20,15 +20,12 @@ import org.boozallen.plugins.jte.init.dsl.PipelineConfigurationObject
 import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
 import org.kohsuke.stapler.DataBoundConstructor
 
+@SuppressWarnings(['UnnecessaryConstructor', 'UnusedMethodParameter'])
 class NullPipelineConfigurationProvider extends PipelineConfigurationProvider{
 
-    @DataBoundConstructor
-    NullPipelineConfigurationProvider(){}
-
+    @DataBoundConstructor NullPipelineConfigurationProvider(){}
     PipelineConfigurationObject getConfig(FlowExecutionOwner owner){ return null }
-
     String getJenkinsfile(FlowExecutionOwner owner){ return null }
-
     String getTemplate(FlowExecutionOwner owner, String template){ return null }
 
     @Extension
@@ -37,4 +34,5 @@ class NullPipelineConfigurationProvider extends PipelineConfigurationProvider{
             return "None"
         }
     }
+
 }

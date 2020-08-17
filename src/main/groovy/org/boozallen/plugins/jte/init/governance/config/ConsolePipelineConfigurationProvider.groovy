@@ -65,19 +65,24 @@ class ConsolePipelineConfigurationProvider extends PipelineConfigurationProvider
         return pipelineConfig ? new PipelineConfigurationDsl(owner).parse(pipelineConfig) : null
     }
 
+    @SuppressWarnings('UnusedMethodParameter')
     String getJenkinsfile(FlowExecutionOwner owner){
         return defaultTemplate
     }
 
+    @SuppressWarnings('UnusedMethodParameter')
     String getTemplate(FlowExecutionOwner owner, String templateName){
-        ConsolePipelineTemplate template = pipelineCatalog.find{ it.getName() == templateName }
+        ConsolePipelineTemplate template = pipelineCatalog.find{ item -> item.getName() == templateName }
         return template ? template.getTemplate() : null
     }
 
     @Extension
     static class DescriptorImpl extends PipelineConfigurationProvider.PipelineConfigurationProviderDescriptor{
+
         String getDisplayName(){
             return "From Console"
         }
+
     }
+
 }

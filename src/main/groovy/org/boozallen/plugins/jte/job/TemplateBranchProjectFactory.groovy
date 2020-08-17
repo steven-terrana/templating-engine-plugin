@@ -26,7 +26,6 @@ import org.boozallen.plugins.jte.init.governance.config.ScmPipelineConfiguration
 import org.jenkinsci.plugins.workflow.flow.FlowDefinition
 import org.jenkinsci.plugins.workflow.multibranch.AbstractWorkflowBranchProjectFactory
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowBranchProjectFactory
-import org.kohsuke.stapler.DataBoundConstructor
 import org.kohsuke.stapler.DataBoundSetter
 
 import javax.annotation.Nonnull
@@ -34,9 +33,6 @@ import javax.annotation.Nonnull
 class TemplateBranchProjectFactory extends WorkflowBranchProjectFactory {
 
     Boolean filterBranches
-
-    @DataBoundConstructor
-    TemplateBranchProjectFactory() {}
 
     Object readResolve() {
         if (this.filterBranches == null) {
@@ -105,7 +101,7 @@ class TemplateBranchProjectFactory extends WorkflowBranchProjectFactory {
 
         @Override
         boolean isApplicable(Class<? extends MultiBranchProject> clazz) {
-            return MultiBranchProject.class.isAssignableFrom(clazz)
+            return MultiBranchProject.isAssignableFrom(clazz)
         }
 
         @Nonnull

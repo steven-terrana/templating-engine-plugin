@@ -29,26 +29,43 @@ import org.boozallen.plugins.jte.init.governance.libs.LibraryProvider
 import org.boozallen.plugins.jte.init.governance.libs.LibrarySource
 import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
 import org.jenkinsci.plugins.workflow.job.WorkflowJob
-import org.kohsuke.stapler.DataBoundConstructor
 import org.kohsuke.stapler.DataBoundSetter
 import org.kohsuke.stapler.StaplerRequest
 import hudson.model.Descriptor.FormException
 
 class GovernanceTier extends AbstractDescribableImpl<GovernanceTier> implements Serializable{
 
+    private static final long serialVersionUID = 1L
     PipelineConfigurationProvider configurationProvider = new NullPipelineConfigurationProvider()
     List<LibrarySource> librarySources
 
-    @DataBoundConstructor
-    GovernanceTier(){}
+    /*
+       returns the job's GovernanceTier hierarchy in ascending order
+       for governance, call .reverse() on the returned array to go top down
+       for scoping of props, you can just iterate on the list
+   */
+    static List<GovernanceTier> getHierarchy(WorkflowJob job){
+        List<GovernanceTier> h = []
 
-    protected Object readResolve(){
-        if(configurationProvider == null){
-            configurationProvider = new NullPipelineConfigurationProvider()
+        // folder pipeline configs
+        ItemGroup<?> parent = job.getParent()
+        while(parent instanceof AbstractFolder){
+            GovernanceTier tier = parent.getProperties().get(TemplateConfigFolderProperty)?.getTier()
+            if (tier){
+                h.push(tier)
+            }
+            parent = parent.getParent()
         }
-        return this
+
+        // global config
+        GovernanceTier tier = TemplateGlobalConfig.get().getTier()
+        if (tier){
+            h.push(tier)
+        }
+        return h
     }
 
+    @SuppressWarnings('ParameterReassignment')
     @DataBoundSetter
     void setConfigurationProvider(PipelineConfigurationProvider configurationProvider){
         if(configurationProvider == null){
@@ -82,39 +99,15 @@ class GovernanceTier extends AbstractDescribableImpl<GovernanceTier> implements 
         return configurationProvider.getTemplate(owner, template)
     }
 
-    /*
-        returns the job's GovernanceTier hierarchy in ascending order
-        for governance, call .reverse() on the returned array to go top down
-        for scoping of props, you can just iterate on the list
-    */
-    static List<GovernanceTier> getHierarchy(WorkflowJob job){
-        List<GovernanceTier> h = new ArrayList()
-
-        // folder pipeline configs
-        ItemGroup<?> parent = job.getParent()
-        while(parent instanceof AbstractFolder){
-            GovernanceTier tier = parent.getProperties().get(TemplateConfigFolderProperty)?.getTier()
-            if (tier){
-                h.push(tier)
-            }
-            parent = parent.getParent()
+    protected Object readResolve(){
+        if(configurationProvider == null){
+            configurationProvider = new NullPipelineConfigurationProvider()
         }
-
-        // global config
-        GovernanceTier tier = TemplateGlobalConfig.get().getTier()
-        if (tier){
-            h.push(tier)
-        }
-        return h
+        return this
     }
 
     @Extension
     final static class DescriptorImpl extends Descriptor<GovernanceTier> {
-        @Override
-        GovernanceTier newInstance(StaplerRequest req, JSONObject formData) throws FormException {
-            GovernanceTier tier = (GovernanceTier) super.newInstance(req, formData)
-            return tier.librarySources?.isEmpty() ? null : tier
-        }
 
         static List<LibraryProvider.LibraryProviderDescriptor> getLibraryProviders(){
             return Jenkins.get().getExtensionList(LibraryProvider.LibraryProviderDescriptor)
@@ -124,8 +117,15 @@ class GovernanceTier extends AbstractDescribableImpl<GovernanceTier> implements 
             return Jenkins.get().getExtensionList(PipelineConfigurationProvider.PipelineConfigurationProviderDescriptor)
         }
 
+        @Override
+        GovernanceTier newInstance(StaplerRequest req, JSONObject formData) throws FormException {
+            GovernanceTier tier = (GovernanceTier) super.newInstance(req, formData)
+            return tier.librarySources?.isEmpty() ? null : tier
+        }
+
         Descriptor getDefaultConfigurationProvider(){
             return Jenkins.get().getDescriptor(NullPipelineConfigurationProvider)
         }
     }
+
 }
