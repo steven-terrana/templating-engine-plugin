@@ -127,8 +127,21 @@ class PipelineDecorator extends InvisibleAction {
             injector.doPostInject(flowOwner, config, templateBinding)
         }
 
+        checkPrimitiveCollisions( templateBinding, flowOwner.getExecutable())
+
         templateBinding.lock()
         return templateBinding
+    }
+
+    // will probably become a method on the validation class
+    Set<String> checkPrimitiveCollisions(TemplateBinding templateBinding, hudson.model.Run run){
+        Set<String> registry = templateBinding.getRegistryValues()
+        List<String> functionNames = org.jenkinsci.plugins.workflow.steps.StepDescriptor.all()*.functionName
+        Set<String> collisions = registry.intersect(functionNames)
+
+        return collisions + registry.collect { key ->
+            org.jenkinsci.plugins.workflow.cps.GlobalVariable.byName(key, run)
+        }.findAll{ g -> null != g }
     }
 
     String determinePipelineTemplate(){

@@ -97,4 +97,9 @@ class TemplateBinding extends Binding implements Serializable{
         throw new TemplateException("No step ${stepName} has been loaded")
     }
 
+    // dont want to replace the property
+    Set<String> getRegistryValues(){
+        return Collections.unmodifiableSet(this.registry)
+    }
+
 }
