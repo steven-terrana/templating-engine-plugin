@@ -17,29 +17,33 @@ package org.boozallen.plugins.jte.init.primitives.injectors
 
 import hudson.Extension
 import org.boozallen.plugins.jte.init.governance.config.dsl.PipelineConfigurationObject
+import org.boozallen.plugins.jte.init.governance.config.dsl.TemplateConfigException
+import org.boozallen.plugins.jte.init.governance.GovernanceTier
+import org.boozallen.plugins.jte.init.governance.libs.LibraryProvider
+import org.boozallen.plugins.jte.init.governance.libs.LibrarySource
+import org.boozallen.plugins.jte.init.primitives.RunAfter
 import org.boozallen.plugins.jte.init.primitives.TemplateBinding
 import org.boozallen.plugins.jte.init.primitives.TemplatePrimitiveInjector
+import org.boozallen.plugins.jte.util.TemplateLogger
 import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
+import org.jenkinsci.plugins.workflow.job.WorkflowJob
 
 /**
- * injects the aggregated pipeline configuration as a variable called pipelineConfig into the
+ * Loads libraries from the pipeline configuration and injects StepWrapper's into the
  * run's {@link org.boozallen.plugins.jte.init.primitives.TemplateBinding}
  */
-@Extension class PipelineConfigVariableInjector extends TemplatePrimitiveInjector {
+@Extension class TemplateMethodInjector extends TemplatePrimitiveInjector {
 
-    static final String VARIABLE = "pipelineConfig"
-
-    @SuppressWarnings('NoDef')
     @Override
+    @RunAfter([LibraryStepInjector, DefaultStepInjector])
     void injectPrimitives(FlowExecutionOwner flowOwner, PipelineConfigurationObject config, TemplateBinding binding){
-        Class keywordClass = KeywordInjector.getPrimitiveClass()
-        def pipelineConfig = keywordClass.newInstance(
-            keyword: VARIABLE,
-            value: config.getConfig(),
-            preLockException: "Variable ${VARIABLE} reserved for accessing the aggregated pipeline configuration",
-            postLockException: "Variable ${VARIABLE} reserved for accessing the aggregated pipeline configuration"
-        )
-        binding.setVariable(VARIABLE, pipelineConfig)
+        LinkedHashMap aggregatedConfig = config.getConfig()
+        StepWrapperFactory stepFactory = new StepWrapperFactory(flowOwner)
+        aggregatedConfig.template_methods.each{ step, _ ->
+            if(!binding.hasStep(step)){
+                binding.setVariable(step, stepFactory.createNullStep(step, binding))
+            }
+        }
     }
 
 }

@@ -21,6 +21,7 @@ import org.boozallen.plugins.jte.init.governance.config.dsl.TemplateConfigExcept
 import org.boozallen.plugins.jte.init.governance.GovernanceTier
 import org.boozallen.plugins.jte.init.governance.libs.LibraryProvider
 import org.boozallen.plugins.jte.init.governance.libs.LibrarySource
+import org.boozallen.plugins.jte.init.primitives.TemplateBinding
 import org.boozallen.plugins.jte.init.primitives.TemplatePrimitiveInjector
 import org.boozallen.plugins.jte.util.TemplateLogger
 import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
@@ -30,19 +31,16 @@ import org.jenkinsci.plugins.workflow.job.WorkflowJob
  * Loads libraries from the pipeline configuration and injects StepWrapper's into the
  * run's {@link org.boozallen.plugins.jte.init.primitives.TemplateBinding}
  */
-@Extension class LibraryLoader extends TemplatePrimitiveInjector {
+@Extension class LibraryStepInjector extends TemplatePrimitiveInjector {
 
     @Override
-    void doInject(FlowExecutionOwner flowOwner, PipelineConfigurationObject config, Binding binding){
-        // 1. Inject steps from loaded libraries
-        WorkflowJob job = flowOwner.run().getParent()
-        List<GovernanceTier> tiers = GovernanceTier.getHierarchy(job)
-        List<LibrarySource> libs = tiers.collect{ tier ->
-            tier.getLibrarySources()
-        }.flatten() - null
-        List<LibraryProvider> providers = libs.collect{ libSource ->
-            libSource.getLibraryProvider()
-        } - null
+    void validateConfiguration(FlowExecutionOwner flowOwner, PipelineConfigurationObject config){
+
+    }
+
+    @Override
+    void injectPrimitives(FlowExecutionOwner flowOwner, PipelineConfigurationObject config, TemplateBinding binding){
+        List<LibraryProvider> providers = getLibraryProviders(flowOwner)
 
         ArrayList libConfigErrors = []
         config.getConfig().libraries.each{ libName, libConfig ->
@@ -70,34 +68,18 @@ import org.jenkinsci.plugins.workflow.job.WorkflowJob
             logger.printError("----------------------------------")
             throw new TemplateConfigException("There were library configuration errors.")
         }
-
-        // 2. Inject steps with default step implementation for configured step
-        StepWrapperFactory stepFactory = new StepWrapperFactory(flowOwner)
-        config.getConfig().steps.findAll{ stepName, stepConfig ->
-            if (binding.hasStep(stepName)){
-                ArrayList msg = [
-                    "Configured step ${stepName} ignored.",
-                    "-- Loaded by the ${binding.getStep(stepName).library} Library."
-                ]
-                logger.printWarning msg.join("\n")
-                return false
-            }
-            return true
-        }.each{ stepName, stepConfig ->
-            logger.print "Creating step ${stepName} from the default step implementation."
-            binding.setVariable(stepName, stepFactory.createDefaultStep(binding, stepName, stepConfig))
-        }
     }
 
-    @Override
-    void doPostInject(FlowExecutionOwner flowOwner, PipelineConfigurationObject config, Binding binding){
-        // 3. Inject a passthrough step for steps not defined (either as steps or other primitives)
-        StepWrapperFactory stepFactory = new StepWrapperFactory(flowOwner)
-        config.getConfig().template_methods.findAll{ step ->
-            !(step.key in binding.registry)
-        }.each{ step ->
-            binding.setVariable(step.key, stepFactory.createNullStep(step.key, binding))
-        }
+    private List<LibraryProvider> getLibraryProviders(FlowExecutionOwner flowOwner){
+        WorkflowJob job = flowOwner.run().getParent()
+        List<GovernanceTier> tiers = GovernanceTier.getHierarchy(job)
+        List<LibrarySource> librarySources = tiers.collect{ tier ->
+            tier.getLibrarySources()
+        }.flatten() - null
+        List<LibraryProvider> providers = librarySources.collect{ source ->
+            source.getLibraryProvider()
+        } - null
+        return providers
     }
 
 }
