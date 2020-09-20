@@ -17,8 +17,8 @@ package org.boozallen.plugins.jte.init.primitives
 
 import hudson.ExtensionList
 import org.boozallen.plugins.jte.init.governance.config.dsl.PipelineConfigurationObject
+import org.boozallen.plugins.jte.util.AggregateException
 import org.boozallen.plugins.jte.util.JTEException
-import org.boozallen.plugins.jte.util.TemplateLogger
 import org.codehaus.groovy.reflection.CachedMethod
 import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
 import org.jgrapht.Graph
@@ -26,6 +26,7 @@ import org.jgrapht.graph.DefaultDirectedGraph
 import org.jgrapht.graph.DefaultEdge
 import org.jgrapht.traverse.TopologicalOrderIterator
 import org.jgrapht.alg.cycle.CycleDetector
+
 import java.lang.reflect.Method
 
 /**
@@ -35,26 +36,46 @@ import java.lang.reflect.Method
 class TemplateBindingFactory {
 
     static TemplateBinding create(FlowExecutionOwner flowOwner, PipelineConfigurationObject config){
-        // create template binding
         TemplateBinding templateBinding = new TemplateBinding(flowOwner)
-
         invoke("validateConfiguration", flowOwner, config)
         invoke("injectPrimitives", flowOwner, config, templateBinding)
         invoke("validateBinding", flowOwner, config, templateBinding)
-
         templateBinding.lock()
-
         return templateBinding
     }
 
     private static void invoke(String phase, Object... args){
-        TemplateLogger logger = new TemplateLogger(args[0].getListener())
-        Graph<TemplatePrimitiveInjector, DefaultEdge> graph = buildGraph(phase, args)
+        List<Class<? extends TemplatePrimitiveInjector>> failedInjectors = []
+        Graph<Class<? extends TemplatePrimitiveInjector>, DefaultEdge> graph = buildGraph(phase, args)
+        AggregateException errors = new AggregateException()
         new TopologicalOrderIterator<>(graph).each{ injectorClazz ->
-            logger.printWarning("${injectorClazz}: ${phase}")
             TemplatePrimitiveInjector injector = injectorClazz.getDeclaredConstructor().newInstance()
-            injector.invokeMethod(phase, args)
+            try{
+                // check if a dependent injector has failed, if so, don't execute
+                if(!(getPrerequisites(injector, phase, args).intersect(failedInjectors))){
+                    injector.invokeMethod(phase, args)
+                }
+            } catch(any){
+                errors.add(any)
+                failedInjectors << injectorClazz
+            }
         }
+        if(errors.size()) { // this phase failed throw an exception
+            throw errors
+        }
+    }
+
+    private static List<Class<? extends TemplatePrimitiveInjector>> getPrerequisites(TemplatePrimitiveInjector injector, String name, Object... args){
+        List<TemplatePrimitiveInjector> prereqs = []
+        MetaMethod metaMethod = injector.metaClass.pickMethod(name, args*.class as Class[])
+        if(metaMethod instanceof CachedMethod) {
+            Method method = metaMethod.getCachedMethod()
+            RunAfter annotation = method.getAnnotation(RunAfter)
+            if (annotation) {
+                prereqs = [annotation.value()].flatten() as List<Class<? extends TemplatePrimitiveInjector>>
+            }
+        }
+        return prereqs
     }
 
     /**
@@ -67,32 +88,25 @@ class TemplateBindingFactory {
      * @param args
      * @return
      */
-    private static Graph<TemplatePrimitiveInjector, DefaultEdge> buildGraph(String name, Object... args){
-        Graph<TemplatePrimitiveInjector, DefaultEdge> graph = new DefaultDirectedGraph<>(DefaultEdge)
-        ExtensionList<TemplatePrimitiveInjector> injectorInstances = TemplatePrimitiveInjector.all()
-        Class<? extends TemplatePrimitiveInjector>[] injectors = injectorInstances*.class
+    private static Graph<Class<? extends TemplatePrimitiveInjector>, DefaultEdge> buildGraph(String name, Object... args){
+        Graph<Class<? extends TemplatePrimitiveInjector>, DefaultEdge> graph = new DefaultDirectedGraph<>(DefaultEdge)
+        ExtensionList<TemplatePrimitiveInjector> injectors = TemplatePrimitiveInjector.all()
         // add each injector as a node in the graph
-        injectors.each{ injector -> graph.addVertex(injector) }
+        injectors.each{ injector -> graph.addVertex(injector.class) }
 
         // for each injector, connect edges
         injectors.each{ injector ->
-            MetaMethod metaMethod = injector.metaClass.pickMethod(name, args*.class as Class[])
-            if(metaMethod instanceof CachedMethod){
-                Method method = metaMethod.getCachedMethod()
-                RunAfter annotation = method.getAnnotation(RunAfter)
-                if(annotation) {
-                    List<TemplatePrimitiveInjector> prereqs = [annotation.value()].flatten()
-                    prereqs.each { req ->
-                        graph.addEdge(req, injector)
-                    }
-                }
+            List<Class<? extends TemplatePrimitiveInjector>> prereqs = getPrerequisites(injector, name, args)
+            prereqs.each{ req ->
+                graph.addEdge(req, injector.class)
             }
         }
 
         // check for infinite loops
         CycleDetector detector = new CycleDetector(graph)
-        if(detector.detectCycles()){
-            throw new JTEException("There are cyclic dependencies preventing initialization")
+        Set<TemplatePrimitiveInjector> cycles = detector.findCycles()
+        if(cycles){
+            throw new JTEException("There are cyclic dependencies preventing initialization: ${cycles}")
         }
 
         return graph

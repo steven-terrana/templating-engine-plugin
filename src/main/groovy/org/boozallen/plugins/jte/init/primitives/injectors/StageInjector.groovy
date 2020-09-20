@@ -41,24 +41,35 @@ import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
     @RunAfter([LibraryStepInjector, DefaultStepInjector, TemplateMethodInjector])
     void injectPrimitives(FlowExecutionOwner flowOwner, PipelineConfigurationObject config, TemplateBinding binding){
         Class stageClass = getPrimitiveClass()
-        LinkedHashMap stagesWithUndefinedSteps = [:]
         config.getConfig().stages.each{ name, steps ->
             List<String> stepNames = steps.keySet() as List<String>
-            // validate steps are present
-            List<String> undefinedSteps = stepNames.findAll{ step -> !binding.hasStep(step) }
+            binding.setVariable(name, stageClass.newInstance(binding, name, stepNames))
+        }
+    }
+
+    @Override
+    void validateBinding(FlowExecutionOwner flowOwner, PipelineConfigurationObject config, TemplateBinding binding){
+        LinkedHashMap aggregatedConfig = config.getConfig()
+        LinkedHashMap stagesWithUndefinedSteps = [:]
+        aggregatedConfig.stages.each{ name, stageConfig ->
+            List<String> steps = stageConfig.keySet() as List<String>
+            List<String> undefinedSteps = []
+            steps.each{ step ->
+                if(!binding.hasStep(step)){
+                    undefinedSteps << step
+                }
+            }
             if(undefinedSteps){
                 stagesWithUndefinedSteps[name] = undefinedSteps
-            } else {
-                binding.setVariable(name, stageClass.newInstance(binding, name, stepNames))
             }
         }
         if(stagesWithUndefinedSteps){
             List<String> error = [
-                "The following Stages reference steps that do not exist.",
-                "Consider adding step names to the template_methods block"
+                    "There are Stages defined that reference steps that do not exist.",
+                    "Consider adding step names to the template_methods block"
             ]
-            stagesWithUndefinedSteps.each{ stageName, missingSteps ->
-                error << "- ${stageName}: ${missingSteps.join(", ")}".toString()
+            stagesWithUndefinedSteps.each{ name, steps ->
+                error << "- ${name}: ${steps.join(", ")}".toString()
             }
             TemplateLogger logger = new TemplateLogger(flowOwner.getListener())
             logger.printError(error.join("\n"))

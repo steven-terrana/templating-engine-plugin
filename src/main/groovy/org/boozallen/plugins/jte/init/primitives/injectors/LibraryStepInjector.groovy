@@ -17,12 +17,14 @@ package org.boozallen.plugins.jte.init.primitives.injectors
 
 import hudson.Extension
 import org.boozallen.plugins.jte.init.governance.config.dsl.PipelineConfigurationObject
-import org.boozallen.plugins.jte.init.governance.config.dsl.TemplateConfigException
 import org.boozallen.plugins.jte.init.governance.GovernanceTier
 import org.boozallen.plugins.jte.init.governance.libs.LibraryProvider
 import org.boozallen.plugins.jte.init.governance.libs.LibrarySource
 import org.boozallen.plugins.jte.init.primitives.TemplateBinding
 import org.boozallen.plugins.jte.init.primitives.TemplatePrimitiveInjector
+import org.boozallen.plugins.jte.util.AggregateException
+import org.boozallen.plugins.jte.util.ConfigValidator
+import org.boozallen.plugins.jte.util.JTEException
 import org.boozallen.plugins.jte.util.TemplateLogger
 import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
 import org.jenkinsci.plugins.workflow.job.WorkflowJob
@@ -35,38 +37,45 @@ import org.jenkinsci.plugins.workflow.job.WorkflowJob
 
     @Override
     void validateConfiguration(FlowExecutionOwner flowOwner, PipelineConfigurationObject config){
-
+        AggregateException errors = new AggregateException()
+        List<LibraryProvider> providers = getLibraryProviders(flowOwner)
+        ConfigValidator validator = new ConfigValidator(flowOwner)
+        config.getConfig().libraries.each { libName, libConfig ->
+            LibraryProvider provider = providers.find{ provider ->
+                provider.hasLibrary(flowOwner, libName)
+            }
+            if(provider){
+                String schema = provider.getLibrarySchema(flowOwner, libName)
+                if(schema){
+                    try {
+                        validator.validate(schema, libConfig)
+                    } catch (AggregateException e) {
+                        TemplateLogger logger = new TemplateLogger(flowOwner.getListener())
+                        String errorHeader = "Library ${libName} has configuration errors"
+                        logger.printError(errorHeader)
+                        e.getExceptions().eachWithIndex{ error, idx ->
+                            logger.printError("${idx + 1}. ${error.getMessage()}".toString())
+                        }
+                        errors.add(new JTEException(errorHeader))
+                    }
+                }
+            } else {
+                errors.add(new JTEException("Library ${libName} not found."))
+            }
+        }
+        if(errors.size()){
+            throw errors
+        }
     }
 
     @Override
     void injectPrimitives(FlowExecutionOwner flowOwner, PipelineConfigurationObject config, TemplateBinding binding){
         List<LibraryProvider> providers = getLibraryProviders(flowOwner)
-
-        ArrayList libConfigErrors = []
         config.getConfig().libraries.each{ libName, libConfig ->
-            LibraryProvider p = providers.find{ provider ->
+            LibraryProvider provider = providers.find{ provider ->
                 provider.hasLibrary(flowOwner, libName)
             }
-            if (p){
-                libConfigErrors << p.loadLibrary(flowOwner, binding, libName, libConfig)
-            } else {
-                libConfigErrors << "Library ${libName} Not Found."
-            }
-        }
-        libConfigErrors = libConfigErrors.flatten() - null
-
-        TemplateLogger logger = new TemplateLogger(flowOwner.getListener())
-
-        // if library errors were found:
-        if(libConfigErrors){
-            logger.printError("----------------------------------")
-            logger.printError("   Library Configuration Errors   ")
-            logger.printError("----------------------------------")
-            libConfigErrors.each{ line ->
-                logger.printError(line)
-            }
-            logger.printError("----------------------------------")
-            throw new TemplateConfigException("There were library configuration errors.")
+            provider.loadLibrary(flowOwner, binding, libName, libConfig)
         }
     }
 
