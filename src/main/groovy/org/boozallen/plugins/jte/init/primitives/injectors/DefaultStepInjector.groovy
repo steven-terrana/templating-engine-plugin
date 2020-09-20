@@ -48,7 +48,6 @@ import org.jenkinsci.plugins.workflow.job.WorkflowJob
                     "-- Loaded by the ${binding.getStep(stepName).library} Library."
                 ]
                 logger.printWarning msg.join("\n")
-                return false
             } else { // otherwise go ahead and create the default step implementation
                 logger.print "Creating step ${stepName} from the default step implementation."
                 binding.setVariable(stepName, stepFactory.createDefaultStep(binding, stepName, stepConfig))

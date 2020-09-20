@@ -105,7 +105,7 @@ class ConfigValidator {
     }
 
     /**
-     *
+     * returns true if validateType finds an issue
      * @param logger Logger to print messages
      * @param actual the user defined value
      * @param expected the validation for the value
