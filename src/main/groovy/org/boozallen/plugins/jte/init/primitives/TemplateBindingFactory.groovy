@@ -46,7 +46,7 @@ class TemplateBindingFactory {
 
     private static void invoke(String phase, Object... args){
         List<Class<? extends TemplatePrimitiveInjector>> failedInjectors = []
-        Graph<Class<? extends TemplatePrimitiveInjector>, DefaultEdge> graph = buildGraph(phase, args)
+        Graph<Class<? extends TemplatePrimitiveInjector>, DefaultEdge> graph = createGraph(phase, args)
         AggregateException errors = new AggregateException()
         new TopologicalOrderIterator<>(graph).each{ injectorClazz ->
             TemplatePrimitiveInjector injector = injectorClazz.getDeclaredConstructor().newInstance()
@@ -88,7 +88,7 @@ class TemplateBindingFactory {
      * @param args
      * @return
      */
-    private static Graph<Class<? extends TemplatePrimitiveInjector>, DefaultEdge> buildGraph(String name, Object... args){
+    private static Graph<Class<? extends TemplatePrimitiveInjector>, DefaultEdge> createGraph(String name, Object... args){
         Graph<Class<? extends TemplatePrimitiveInjector>, DefaultEdge> graph = new DefaultDirectedGraph<>(DefaultEdge)
         ExtensionList<TemplatePrimitiveInjector> injectors = TemplatePrimitiveInjector.all()
         // add each injector as a node in the graph

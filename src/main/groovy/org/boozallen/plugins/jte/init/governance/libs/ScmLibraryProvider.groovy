@@ -121,7 +121,6 @@ class ScmLibraryProvider extends LibraryProvider{
             FilePath resourceFile = rootDir.child(relativePath)
             resourceFile.write(file.contentAsString(), "UTF-8")
         }
-
     }
 
     void recurseChildren(SCMFile file, Closure action){

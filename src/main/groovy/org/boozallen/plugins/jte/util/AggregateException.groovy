@@ -21,6 +21,7 @@ import groovy.transform.InheritConstructors
  * A generic exception to mark an exception as coming from JTE
  */
 @InheritConstructors class AggregateException extends Exception {
+
     private List<Exception> exceptions = []
 
     void add(Exception e){
@@ -42,7 +43,7 @@ import groovy.transform.InheritConstructors
     String getMessage(){
         List<String> msg = ["The following errors occurred: "]
         exceptions.eachWithIndex{ e, i ->
-            msg.push("${i+1}: ${e.getMessage()}".toString())
+            msg.push("${i + 1}: ${e.getMessage()}".toString())
         }
         return msg.join("\n")
     }

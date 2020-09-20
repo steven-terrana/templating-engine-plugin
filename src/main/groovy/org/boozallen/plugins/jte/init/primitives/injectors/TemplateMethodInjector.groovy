@@ -17,16 +17,10 @@ package org.boozallen.plugins.jte.init.primitives.injectors
 
 import hudson.Extension
 import org.boozallen.plugins.jte.init.governance.config.dsl.PipelineConfigurationObject
-import org.boozallen.plugins.jte.init.governance.config.dsl.TemplateConfigException
-import org.boozallen.plugins.jte.init.governance.GovernanceTier
-import org.boozallen.plugins.jte.init.governance.libs.LibraryProvider
-import org.boozallen.plugins.jte.init.governance.libs.LibrarySource
 import org.boozallen.plugins.jte.init.primitives.RunAfter
 import org.boozallen.plugins.jte.init.primitives.TemplateBinding
 import org.boozallen.plugins.jte.init.primitives.TemplatePrimitiveInjector
-import org.boozallen.plugins.jte.util.TemplateLogger
 import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
-import org.jenkinsci.plugins.workflow.job.WorkflowJob
 
 /**
  * Loads libraries from the pipeline configuration and injects StepWrapper's into the
@@ -34,6 +28,7 @@ import org.jenkinsci.plugins.workflow.job.WorkflowJob
  */
 @Extension class TemplateMethodInjector extends TemplatePrimitiveInjector {
 
+    @SuppressWarnings("ParameterName")
     @Override
     @RunAfter([LibraryStepInjector, DefaultStepInjector])
     void injectPrimitives(FlowExecutionOwner flowOwner, PipelineConfigurationObject config, TemplateBinding binding){
