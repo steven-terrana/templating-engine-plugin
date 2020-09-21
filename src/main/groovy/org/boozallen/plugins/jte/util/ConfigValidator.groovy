@@ -30,10 +30,13 @@ class ConfigValidator {
         this.flowOwner = flowOwner
     }
 
-    @SuppressWarnings('NoDef')
-    void validate(String schemaString, LinkedHashMap config) throws AggregateException{
+    void validate(String schemaString, LinkedHashMap config){
         LinkedHashMap schema = parseSchema(schemaString)
+        validate(schema, config)
+    }
 
+    @SuppressWarnings('NoDef')
+    void validate(LinkedHashMap schema, LinkedHashMap config) throws AggregateException{
         // define key sets in dot notation
         List<String> keys = getNestedKeys(config)
         List<String> required = getNestedKeys(schema.fields?.required)
