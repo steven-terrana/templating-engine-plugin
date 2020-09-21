@@ -28,17 +28,32 @@ import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
 @Extension class PipelineConfigVariableInjector extends TemplatePrimitiveInjector {
 
     static final String VARIABLE = "pipelineConfig"
+    static final Map VALIDATION = [fields: [optional: [allow_scm_jenkinsfile: Boolean, pipeline_template:String]]]
+    static final String JTE_ERROR_HEADING = "Pipeline Config JTE Block Errors"
 
     @SuppressWarnings('NoDef')
     @Override
     void injectPrimitives(FlowExecutionOwner flowOwner, PipelineConfigurationObject config, TemplateBinding binding){
         Class keywordClass = KeywordInjector.getPrimitiveClass()
+
+        // validate the jte section
+        LibraryProvider.ConfigChecker configChecker = new LibraryProvider.ConfigChecker()
+        Map pipelineConfigMap = config.getConfig()
+        if( pipelineConfigMap.jte) {
+            List<String> errors = configChecker.doConfigMapValidation(flowOwner, VALIDATION, pipelineConfigMap.jte)
+            if( !errors.empty ){
+                configChecker.printErrors( errors, flowOwner, JTE_ERROR_HEADING)
+            }
+        }
+
+        // add the pipelineConfig to the binding
         def pipelineConfig = keywordClass.newInstance(
             keyword: VARIABLE,
             value: config.getConfig(),
             preLockException: "Variable ${VARIABLE} reserved for accessing the aggregated pipeline configuration",
             postLockException: "Variable ${VARIABLE} reserved for accessing the aggregated pipeline configuration"
         )
+
         binding.setVariable(VARIABLE, pipelineConfig)
     }
 
