@@ -59,6 +59,7 @@ import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
     static class KeywordNamespace extends PrimitiveNamespace {
         String name = KEY
         String missingPropertyException = "Keyword %s not found"
+        LinkedHashMap primitives = [:]
         @Override void add(TemplatePrimitive primitive){
             String name = primitive.getName()
             primitives[name] = primitive.getValue()

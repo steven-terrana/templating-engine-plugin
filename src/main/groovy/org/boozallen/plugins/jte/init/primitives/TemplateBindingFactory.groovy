@@ -57,6 +57,9 @@ class TemplateBindingFactory {
                     injector.invokeMethod(phase, args)
                 }
             } catch(any){
+                TemplateLogger logger = new TemplateLogger(args[0].getListener())
+                String msg = [ any.getMessage(), any.getStackTrace()*.toString() ].flatten().join("\n")
+                logger.printError(msg)
                 errors.add(any)
                 failedInjectors << injectorClazz
             }
