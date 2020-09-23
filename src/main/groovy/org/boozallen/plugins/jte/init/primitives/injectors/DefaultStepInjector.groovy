@@ -61,20 +61,7 @@ import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
 
     static class DefaultStepNamespace extends PrimitiveNamespace {
         String name = KEY
-        LinkedHashMap primitives = [:]
-        @Override void add(TemplatePrimitive primitive){
-            String variableName = primitive.getName()
-            primitives[variableName] = primitive
-        }
-        Set<String> getVariables(){
-            return primitives.keySet() as Set<String>
-        }
-        Object getProperty(String name){
-            if(!primitives.containsKey(name)){
-                throw new JTEException("Default Step ${name} not found")
-            }
-            return primitives[name]
-        }
+        String missingPropertyException = "Default Step %s not found"
     }
 
 }

@@ -52,20 +52,7 @@ import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
 
     static class TemplateMethodNamespace extends PrimitiveNamespace {
         String name = KEY
-        LinkedHashMap primitives = [:]
-        @Override void add(TemplatePrimitive primitive){
-            String variableName = primitive.getName()
-            primitives[variableName] = primitive
-        }
-        Set<String> getVariables(){
-            return primitives.keySet() as Set<String>
-        }
-        Object getProperty(String name){
-            if(!primitives.containsKey(name)){
-                throw new JTEException("Template Method Step ${name} not found")
-            }
-            return primitives[name]
-        }
+        String missingPropertyException = "Template Method Step %s not found"
     }
 
 }

@@ -99,20 +99,7 @@ import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
 
     static class StageNamespace extends PrimitiveNamespace {
         String name = KEY
-        LinkedHashMap primitives = [:]
-        @Override void add(TemplatePrimitive primitive){
-            String name = primitive.getName()
-            primitives[name] = primitive
-        }
-        Set<String> getVariables(){
-            return primitives.keySet() as Set<String>
-        }
-        Object getProperty(String name){
-            if(!primitives.containsKey(name)){
-                throw new JTEException("Stage ${name} not found")
-            }
-            return primitives[name]
-        }
+        String missingPropertyException = "Stage %s not found"
     }
 
 }

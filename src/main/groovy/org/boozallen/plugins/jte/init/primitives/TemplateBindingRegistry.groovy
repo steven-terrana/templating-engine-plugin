@@ -88,18 +88,31 @@ class TemplateBindingRegistry implements Serializable{
      * For example, a PrimitiveNamespace identified by foo that holds a TemplatePrimitive
      * bar should be accessible via jte.foo.bar
      */
-    static abstract class PrimitiveNamespace implements Serializable{
+    static class PrimitiveNamespace implements Serializable{
         private static final long serialVersionUID = 1L
+        String missingPropertyException = "Primitive %s not found"
         String name
+        LinkedHashMap primitives = [:]
         /**
          * Add a new primitive to the namespace
          * @param primitive the primitive to be added
          */
-        abstract void add(TemplatePrimitive primitive)
+        void add(TemplatePrimitive primitive){
+            primitives[primitive.getName()] = primitive
+        }
+
+        Object getProperty(String name){
+            if(!primitives.containsKey(name)){
+                throw new JTEException(String.format(missingPropertyException, name))
+            }
+            return primitives[name]
+        }
         /**
          * @return the variable names of the primitives in this namespace
          */
-        abstract Set<String> getVariables()
+        Set<String> getVariables(){
+            return primitives.keySet() as Set<String>
+        }
     }
 
 }
