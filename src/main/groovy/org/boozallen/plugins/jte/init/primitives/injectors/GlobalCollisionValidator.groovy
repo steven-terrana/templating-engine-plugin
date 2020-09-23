@@ -27,8 +27,8 @@ import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
  */
 @Extension class GlobalCollisionValidator extends TemplatePrimitiveInjector{
 
-    static warningHeading = "There are JTE Primitives that have naming collisions with Jenkins globals and steps"
-    static warningMsg = " has a Jenkins global/step collision"
+    static String warningHeading = "There are JTE Primitives that have naming collisions with Jenkins globals and steps"
+    static String warningMsg = " has a Jenkins global/step collision"
 
     @Override
     void validateBinding(FlowExecutionOwner flowOwner, PipelineConfigurationObject config, TemplateBinding binding) {

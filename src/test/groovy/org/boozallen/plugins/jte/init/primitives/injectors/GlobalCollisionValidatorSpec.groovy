@@ -47,8 +47,7 @@ class GlobalCollisionValidatorSpec extends Specification{
                 gradle
             }
 
-            """,
-                template: "build()"        )
+            """, template: "build()")
 
         expect:
         when:
@@ -60,4 +59,5 @@ class GlobalCollisionValidatorSpec extends Specification{
         jenkins.assertLogContains(GlobalCollisionValidator.warningMsg, run)
         jenkins.assertLogContains("build", run)
     }
+
 }
