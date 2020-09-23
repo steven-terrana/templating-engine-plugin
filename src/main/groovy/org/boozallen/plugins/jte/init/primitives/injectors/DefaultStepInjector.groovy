@@ -17,7 +17,7 @@ package org.boozallen.plugins.jte.init.primitives.injectors
 
 import hudson.Extension
 import org.boozallen.plugins.jte.init.governance.config.dsl.PipelineConfigurationObject
-import org.boozallen.plugins.jte.init.primitives.TemplateBindingRegistry.PrimitiveNamespace
+import org.boozallen.plugins.jte.init.primitives.PrimitiveNamespace
 import org.boozallen.plugins.jte.init.primitives.RunAfter
 import org.boozallen.plugins.jte.init.primitives.TemplateBinding
 import org.boozallen.plugins.jte.init.primitives.TemplatePrimitive
@@ -56,12 +56,14 @@ import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
     }
 
     static Class<? extends PrimitiveNamespace> getPrimitiveNamespaceClass(){
-        return DefaultStepNamespace
+        return Namespace
     }
 
-    static class DefaultStepNamespace extends PrimitiveNamespace {
+    static class Namespace extends PrimitiveNamespace {
         String name = KEY
-        String missingPropertyException = "Default Step %s not found"
+        String getMissingPropertyMessage(String name){
+            return "Default Step ${name} not found"
+        }
     }
 
 }

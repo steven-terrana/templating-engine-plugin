@@ -19,7 +19,7 @@ import hudson.ExtensionList
 import hudson.ExtensionPoint
 import jenkins.model.Jenkins
 import org.boozallen.plugins.jte.init.governance.config.dsl.PipelineConfigurationObject
-import org.boozallen.plugins.jte.init.primitives.TemplateBindingRegistry.PrimitiveNamespace
+import org.boozallen.plugins.jte.init.primitives.PrimitiveNamespace
 import org.jenkinsci.plugins.workflow.cps.CpsGroovyShellFactory
 import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
 

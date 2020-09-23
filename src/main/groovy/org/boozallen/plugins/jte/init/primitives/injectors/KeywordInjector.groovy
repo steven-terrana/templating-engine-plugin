@@ -18,7 +18,7 @@ package org.boozallen.plugins.jte.init.primitives.injectors
 import hudson.Extension
 import jenkins.model.Jenkins
 import org.boozallen.plugins.jte.init.governance.config.dsl.PipelineConfigurationObject
-import org.boozallen.plugins.jte.init.primitives.TemplateBindingRegistry.PrimitiveNamespace
+import org.boozallen.plugins.jte.init.primitives.PrimitiveNamespace
 import org.boozallen.plugins.jte.init.primitives.TemplateBinding
 import org.boozallen.plugins.jte.init.primitives.TemplatePrimitive
 import org.boozallen.plugins.jte.init.primitives.TemplatePrimitiveInjector
@@ -53,13 +53,14 @@ import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
     }
 
     static Class<? extends PrimitiveNamespace> getPrimitiveNamespaceClass(){
-        return KeywordNamespace
+        return Namespace
     }
 
-    static class KeywordNamespace extends PrimitiveNamespace {
+    static class Namespace extends PrimitiveNamespace {
         String name = KEY
-        String missingPropertyException = "Keyword %s not found"
-        LinkedHashMap primitives = [:]
+        String getMissingPropertyMessage(String name){
+            return "Keyword ${name} not found"
+        }
         @Override void add(TemplatePrimitive primitive){
             String name = primitive.getName()
             primitives[name] = primitive.getValue()

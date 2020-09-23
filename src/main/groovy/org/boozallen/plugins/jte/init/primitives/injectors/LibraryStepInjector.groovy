@@ -20,7 +20,7 @@ import org.boozallen.plugins.jte.init.governance.config.dsl.PipelineConfiguratio
 import org.boozallen.plugins.jte.init.governance.GovernanceTier
 import org.boozallen.plugins.jte.init.governance.libs.LibraryProvider
 import org.boozallen.plugins.jte.init.governance.libs.LibrarySource
-import org.boozallen.plugins.jte.init.primitives.TemplateBindingRegistry.PrimitiveNamespace
+import org.boozallen.plugins.jte.init.primitives.PrimitiveNamespace
 import org.boozallen.plugins.jte.init.primitives.TemplateBinding
 import org.boozallen.plugins.jte.init.primitives.TemplatePrimitive
 import org.boozallen.plugins.jte.init.primitives.TemplatePrimitiveInjector
@@ -98,10 +98,10 @@ import org.jenkinsci.plugins.workflow.job.WorkflowJob
     }
 
     static Class<? extends PrimitiveNamespace> getPrimitiveNamespaceClass(){
-        return LibrariesNamespace
+        return Namespace
     }
 
-    static class LibrariesNamespace extends PrimitiveNamespace {
+    static class Namespace extends PrimitiveNamespace {
         String name = KEY
         List<Library> libraries = []
         @Override void add(TemplatePrimitive primitive){

@@ -18,7 +18,7 @@ package org.boozallen.plugins.jte.init.primitives.injectors
 import hudson.Extension
 import jenkins.model.Jenkins
 import org.boozallen.plugins.jte.init.governance.config.dsl.PipelineConfigurationObject
-import org.boozallen.plugins.jte.init.primitives.TemplateBindingRegistry.PrimitiveNamespace
+import org.boozallen.plugins.jte.init.primitives.PrimitiveNamespace
 import org.boozallen.plugins.jte.init.primitives.TemplateBinding
 import org.boozallen.plugins.jte.init.primitives.TemplatePrimitive
 import org.boozallen.plugins.jte.init.primitives.TemplatePrimitiveInjector
@@ -59,12 +59,14 @@ import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
     }
 
     static Class<? extends PrimitiveNamespace> getPrimitiveNamespaceClass(){
-        return ApplicationEnvironmentNamespace
+        return Namespace
     }
 
-    static class ApplicationEnvironmentNamespace extends PrimitiveNamespace {
+    static class Namespace extends PrimitiveNamespace {
         String name = KEY
-        String missingPropertyException = "Application Environment %s not found"
+        String getMissingPropertyMessage(String name){
+            return "Application Environment ${name} not found"
+        }
     }
 
 }

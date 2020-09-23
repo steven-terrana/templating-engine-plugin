@@ -18,7 +18,7 @@ package org.boozallen.plugins.jte.util
 import hudson.Extension
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.AbstractWhitelist
 import org.boozallen.plugins.jte.init.primitives.TemplateBindingRegistry
-import org.boozallen.plugins.jte.init.primitives.TemplateBindingRegistry.PrimitiveNamespace
+import org.boozallen.plugins.jte.init.primitives.PrimitiveNamespace
 
 import java.lang.reflect.Method
 
