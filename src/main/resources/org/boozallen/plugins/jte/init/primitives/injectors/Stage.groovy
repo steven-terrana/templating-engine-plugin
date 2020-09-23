@@ -15,8 +15,10 @@
 */
 package org.boozallen.plugins.jte.init.primitives.injectors
 
+import com.cloudbees.groovy.cps.NonCPS
 import org.boozallen.plugins.jte.init.primitives.TemplateException
 import org.boozallen.plugins.jte.init.primitives.TemplatePrimitive
+import org.boozallen.plugins.jte.init.primitives.TemplatePrimitiveInjector
 import org.boozallen.plugins.jte.init.primitives.injectors.StageInjector.StageContext
 import org.boozallen.plugins.jte.util.TemplateLogger
 
@@ -30,6 +32,7 @@ class Stage extends TemplatePrimitive implements Serializable{
     private static final long serialVersionUID = 1L
     Binding binding
     String name
+    Class<? extends TemplatePrimitiveInjector> injector
     ArrayList<String> steps
 
     Stage(){}
@@ -39,6 +42,9 @@ class Stage extends TemplatePrimitive implements Serializable{
         this.name = name
         this.steps = steps
     }
+
+    @NonCPS @Override String getName(){ return name }
+    @NonCPS @Override Class<? extends TemplatePrimitiveInjector> getInjector(){ return injector }
 
     @SuppressWarnings("MethodParameterTypeRequired")
     void call(args) {

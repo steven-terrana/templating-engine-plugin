@@ -17,9 +17,12 @@ package org.boozallen.plugins.jte.init.primitives.injectors
 
 import hudson.Extension
 import org.boozallen.plugins.jte.init.governance.config.dsl.PipelineConfigurationObject
+import org.boozallen.plugins.jte.init.primitives.TemplateBindingRegistry.PrimitiveNamespace
 import org.boozallen.plugins.jte.init.primitives.RunAfter
 import org.boozallen.plugins.jte.init.primitives.TemplateBinding
+import org.boozallen.plugins.jte.init.primitives.TemplatePrimitive
 import org.boozallen.plugins.jte.init.primitives.TemplatePrimitiveInjector
+import org.boozallen.plugins.jte.util.JTEException
 import org.boozallen.plugins.jte.util.TemplateLogger
 import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
 
@@ -29,13 +32,15 @@ import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
  */
 @Extension class DefaultStepInjector extends TemplatePrimitiveInjector {
 
+    private static final String KEY = "steps"
+
     @Override
     @RunAfter(LibraryStepInjector)
     void injectPrimitives(FlowExecutionOwner flowOwner, PipelineConfigurationObject config, TemplateBinding binding){
         LinkedHashMap aggregatedConfig = config.getConfig()
         TemplateLogger logger = new TemplateLogger(flowOwner.getListener())
         StepWrapperFactory stepFactory = new StepWrapperFactory(flowOwner)
-        aggregatedConfig.steps.each{ stepName, stepConfig ->
+        aggregatedConfig[KEY].each{ stepName, stepConfig ->
             // if step already exists, print warning
             if (binding.hasStep(stepName)){
                 ArrayList msg = [
@@ -47,6 +52,28 @@ import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
                 logger.print "Creating step ${stepName} from the default step implementation."
                 binding.setVariable(stepName, stepFactory.createDefaultStep(binding, stepName, stepConfig))
             }
+        }
+    }
+
+    static Class<? extends PrimitiveNamespace> getPrimitiveNamespaceClass(){
+        return DefaultStepNamespace
+    }
+
+    static class DefaultStepNamespace extends PrimitiveNamespace {
+        String name = KEY
+        LinkedHashMap primitives = [:]
+        @Override void add(TemplatePrimitive primitive){
+            String variableName = primitive.getName()
+            primitives[variableName] = primitive
+        }
+        Set<String> getVariables(){
+            return primitives.keySet() as Set<String>
+        }
+        Object getProperty(String name){
+            if(!primitives.containsKey(name)){
+                throw new JTEException("Default Step ${name} not found")
+            }
+            return primitives[name]
         }
     }
 

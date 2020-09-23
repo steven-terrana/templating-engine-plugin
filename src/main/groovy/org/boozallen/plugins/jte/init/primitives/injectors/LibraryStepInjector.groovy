@@ -20,7 +20,9 @@ import org.boozallen.plugins.jte.init.governance.config.dsl.PipelineConfiguratio
 import org.boozallen.plugins.jte.init.governance.GovernanceTier
 import org.boozallen.plugins.jte.init.governance.libs.LibraryProvider
 import org.boozallen.plugins.jte.init.governance.libs.LibrarySource
+import org.boozallen.plugins.jte.init.primitives.TemplateBindingRegistry.PrimitiveNamespace
 import org.boozallen.plugins.jte.init.primitives.TemplateBinding
+import org.boozallen.plugins.jte.init.primitives.TemplatePrimitive
 import org.boozallen.plugins.jte.init.primitives.TemplatePrimitiveInjector
 import org.boozallen.plugins.jte.util.AggregateException
 import org.boozallen.plugins.jte.util.ConfigValidator
@@ -35,12 +37,15 @@ import org.jenkinsci.plugins.workflow.job.WorkflowJob
  */
 @Extension class LibraryStepInjector extends TemplatePrimitiveInjector {
 
+    private static final String KEY = "libraries"
+
     @Override
     void validateConfiguration(FlowExecutionOwner flowOwner, PipelineConfigurationObject config){
+        LinkedHashMap aggregatedConfig = config.getConfig()
         AggregateException errors = new AggregateException()
         List<LibraryProvider> providers = getLibraryProviders(flowOwner)
         ConfigValidator validator = new ConfigValidator(flowOwner)
-        config.getConfig().libraries.each { libName, libConfig ->
+        aggregatedConfig[KEY].each { libName, libConfig ->
             LibraryProvider provider = providers.find{ provider ->
                 provider.hasLibrary(flowOwner, libName)
             }
@@ -70,8 +75,9 @@ import org.jenkinsci.plugins.workflow.job.WorkflowJob
 
     @Override
     void injectPrimitives(FlowExecutionOwner flowOwner, PipelineConfigurationObject config, TemplateBinding binding){
+        LinkedHashMap aggregatedConfig = config.getConfig()
         List<LibraryProvider> providers = getLibraryProviders(flowOwner)
-        config.getConfig().libraries.each{ libName, libConfig ->
+        aggregatedConfig[KEY].each{ libName, libConfig ->
             LibraryProvider provider = providers.find{ provider ->
                 provider.hasLibrary(flowOwner, libName)
             }
@@ -89,6 +95,54 @@ import org.jenkinsci.plugins.workflow.job.WorkflowJob
             source.getLibraryProvider()
         } - null
         return providers
+    }
+
+    static Class<? extends PrimitiveNamespace> getPrimitiveNamespaceClass(){
+        return LibrariesNamespace
+    }
+
+    static class LibrariesNamespace extends PrimitiveNamespace {
+        String name = KEY
+        List<Library> libraries = []
+        @Override void add(TemplatePrimitive primitive){
+            String libName = primitive.getLibrary()
+            Library library = getLibrary(libName)
+            if(!library){
+                library = new Library(name: libName)
+                libraries.push(library)
+            }
+            library.add(primitive)
+        }
+        @Override Set<String> getVariables(){
+            return libraries*.getVariables().flatten() as Set<String>
+        }
+        Object getProperty(String name){
+            Library library = getLibrary(name)
+            if(!library){
+                throw new JTEException("Library ${name} not found.")
+            }
+            return library
+        }
+        private Library getLibrary(String name){
+            return libraries.find{ l -> l.getName() == name }
+        }
+        static class Library extends PrimitiveNamespace{
+            String name
+            List steps = []
+            @Override void add(TemplatePrimitive step){
+                steps.push(step)
+            }
+            @Override Set<String> getVariables(){
+                return steps*.getName() as Set<String>
+            }
+            Object getProperty(String stepName){
+                Object step = steps.find{ s -> s.getName() == stepName }
+                if(!step){
+                    throw new JTEException("JTE Library ${name} does not have step: ${stepName}")
+                }
+                return step
+            }
+        }
     }
 
 }

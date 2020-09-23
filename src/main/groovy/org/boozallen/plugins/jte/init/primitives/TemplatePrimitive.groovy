@@ -23,6 +23,9 @@ abstract class TemplatePrimitive implements Serializable{
 
     private static final long serialVersionUID = 1L
 
+    Class<? extends TemplatePrimitiveInjector> injector
+    String name
+
     /**
      * Invoked if an object with this class were to be overridden in the {@link TemplateBinding} during initialization
      */
@@ -32,5 +35,23 @@ abstract class TemplatePrimitive implements Serializable{
      * Invoked if an object with this class were to be overridden in the {@link TemplateBinding} after initialization
      */
     abstract void throwPostLockException()
+
+    /**
+     * Returns the injector that creates the primitive
+     * <p>
+     * implementing classes must mark this method @NonCPS lest a CpsCallableInvocation be thrown
+     * during initialization
+     * @return
+     */
+    abstract Class<? extends TemplatePrimitiveInjector> getInjector()
+
+    /**
+     * Returns the variable name for this primitive in the binding
+     * <p>
+     * implementing classes must mark this method @NonCPS lest a CpsCallableInvocation be thrown
+     * during initialization
+     * @return
+     */
+    abstract String getName()
 
 }

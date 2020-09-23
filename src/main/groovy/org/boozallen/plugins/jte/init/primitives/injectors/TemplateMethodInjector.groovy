@@ -17,9 +17,12 @@ package org.boozallen.plugins.jte.init.primitives.injectors
 
 import hudson.Extension
 import org.boozallen.plugins.jte.init.governance.config.dsl.PipelineConfigurationObject
+import org.boozallen.plugins.jte.init.primitives.TemplateBindingRegistry.PrimitiveNamespace
 import org.boozallen.plugins.jte.init.primitives.RunAfter
 import org.boozallen.plugins.jte.init.primitives.TemplateBinding
+import org.boozallen.plugins.jte.init.primitives.TemplatePrimitive
 import org.boozallen.plugins.jte.init.primitives.TemplatePrimitiveInjector
+import org.boozallen.plugins.jte.util.JTEException
 import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
 
 /**
@@ -28,16 +31,40 @@ import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
  */
 @Extension class TemplateMethodInjector extends TemplatePrimitiveInjector {
 
+    private static final String KEY = "template_methods"
+
     @SuppressWarnings("ParameterName")
     @Override
     @RunAfter([LibraryStepInjector, DefaultStepInjector])
     void injectPrimitives(FlowExecutionOwner flowOwner, PipelineConfigurationObject config, TemplateBinding binding){
         LinkedHashMap aggregatedConfig = config.getConfig()
         StepWrapperFactory stepFactory = new StepWrapperFactory(flowOwner)
-        aggregatedConfig.template_methods.each{ step, _ ->
+        aggregatedConfig[KEY].each{ step, _ ->
             if(!binding.hasStep(step)){
                 binding.setVariable(step, stepFactory.createNullStep(step, binding))
             }
+        }
+    }
+
+    static Class<? extends PrimitiveNamespace> getPrimitiveNamespaceClass(){
+        return TemplateMethodNamespace
+    }
+
+    static class TemplateMethodNamespace extends PrimitiveNamespace {
+        String name = KEY
+        LinkedHashMap primitives = [:]
+        @Override void add(TemplatePrimitive primitive){
+            String variableName = primitive.getName()
+            primitives[variableName] = primitive
+        }
+        Set<String> getVariables(){
+            return primitives.keySet() as Set<String>
+        }
+        Object getProperty(String name){
+            if(!primitives.containsKey(name)){
+                throw new JTEException("Template Method Step ${name} not found")
+            }
+            return primitives[name]
         }
     }
 

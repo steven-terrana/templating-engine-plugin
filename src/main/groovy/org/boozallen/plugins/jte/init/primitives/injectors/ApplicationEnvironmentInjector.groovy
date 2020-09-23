@@ -18,8 +18,11 @@ package org.boozallen.plugins.jte.init.primitives.injectors
 import hudson.Extension
 import jenkins.model.Jenkins
 import org.boozallen.plugins.jte.init.governance.config.dsl.PipelineConfigurationObject
+import org.boozallen.plugins.jte.init.primitives.TemplateBindingRegistry.PrimitiveNamespace
 import org.boozallen.plugins.jte.init.primitives.TemplateBinding
+import org.boozallen.plugins.jte.init.primitives.TemplatePrimitive
 import org.boozallen.plugins.jte.init.primitives.TemplatePrimitiveInjector
+import org.boozallen.plugins.jte.util.JTEException
 import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
 
 /**
@@ -34,12 +37,15 @@ import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
         return parseClass(classText)
     }
 
+    static private final String KEY = "application_environments"
+
     @SuppressWarnings('NoDef')
     @Override
     void injectPrimitives(FlowExecutionOwner flowOwner, PipelineConfigurationObject config, TemplateBinding binding){
+        LinkedHashMap aggregatedConfig = config.getConfig()
         Class appEnvClass = getPrimitiveClass()
         ArrayList createdEnvs = []
-        config.getConfig().application_environments.each{ name, appEnvConfig ->
+        aggregatedConfig[KEY].each{ name, appEnvConfig ->
             def env = appEnvClass.newInstance(name, appEnvConfig)
             createdEnvs << env
             binding.setVariable(name, env)
@@ -49,6 +55,28 @@ import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
             def next = (index == (createdEnvs.size() - 1)) ? null : createdEnvs[index + 1]
             env.setPrevious(previous)
             env.setNext(next)
+        }
+    }
+
+    static Class<? extends PrimitiveNamespace> getPrimitiveNamespaceClass(){
+        return ApplicationEnvironmentNamespace
+    }
+
+    static class ApplicationEnvironmentNamespace extends PrimitiveNamespace {
+        String name = KEY
+        LinkedHashMap primitives = [:]
+        @Override void add(TemplatePrimitive primitive){
+            String variableName = primitive.getName()
+            primitives[variableName] = primitive
+        }
+        Set<String> getVariables(){
+            return primitives.keySet() as Set<String>
+        }
+        Object getProperty(String name){
+            if(!primitives.containsKey(name)){
+                throw new JTEException("Application Environment ${name} not found")
+            }
+            return primitives[name]
         }
     }
 
