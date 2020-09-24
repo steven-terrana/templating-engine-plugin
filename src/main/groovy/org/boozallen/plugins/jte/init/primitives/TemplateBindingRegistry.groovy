@@ -81,5 +81,13 @@ class TemplateBindingRegistry implements Serializable{
         return namespaces*.getVariables().flatten() as Set<String>
     }
 
+    /**
+     * needed for using as target of 'in' keyword; 'contains' overloading did not implement 'in'
+     * @param o
+     * @return
+     */
+    boolean isCase(Object o){
+        return o in getVariables()
+    }
 }
 
