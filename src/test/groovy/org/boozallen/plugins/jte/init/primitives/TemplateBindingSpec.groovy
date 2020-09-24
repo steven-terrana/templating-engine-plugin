@@ -16,7 +16,6 @@
 package org.boozallen.plugins.jte.init.primitives
 
 import com.cloudbees.groovy.cps.NonCPS
-import org.boozallen.plugins.jte.init.governance.config.dsl.PipelineConfigurationObject
 import org.boozallen.plugins.jte.init.primitives.injectors.StepWrapperFactory
 import org.boozallen.plugins.jte.job.AdHocTemplateFlowDefinition
 import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
@@ -51,14 +50,9 @@ class TemplateBindingSpec extends Specification{
             throw new TemplateException ("post-lock exception")
         }
 
-
     }
 
     static class TestInjector extends TemplatePrimitiveInjector{
-        @Override
-        void injectPrimitives(FlowExecutionOwner flowOwner, PipelineConfigurationObject config, TemplateBinding binding) {
-            super.injectPrimitives(flowOwner, config, binding)
-        }
 
         static Class<? extends TemplatePrimitive> getPrimitiveNamespaceClass(){
             return TestNamespace
@@ -73,10 +67,6 @@ class TemplateBindingSpec extends Specification{
     }
 
     static class LocalKeywordInjector extends TemplatePrimitiveInjector{
-        @Override
-        void injectPrimitives(FlowExecutionOwner flowOwner, PipelineConfigurationObject config, TemplateBinding binding) {
-            super.injectPrimitives(flowOwner, config, binding)
-        }
 
         static Class<? extends TemplatePrimitive> getPrimitiveNamespaceClass(){
             return LocalKeywordNamespace
@@ -91,10 +81,6 @@ class TemplateBindingSpec extends Specification{
     }
 
     static class LocalStepInjector extends TemplatePrimitiveInjector{
-        @Override
-        void injectPrimitives(FlowExecutionOwner flowOwner, PipelineConfigurationObject config, TemplateBinding binding) {
-            super.injectPrimitives(flowOwner, config, binding)
-        }
 
         static Class<? extends TemplatePrimitive> getPrimitiveNamespaceClass(){
             return LocalStepNamespace
@@ -254,16 +240,17 @@ class TemplateBindingSpec extends Specification{
 
     @WithoutJenkins
     def "getStep returns step when variable exists and is StepWrapper"(){
+        def name = "test_step"
         setup:
         GroovySpy(StepWrapperFactory, global:true)
         StepWrapperFactory.getPrimitiveClass() >> { return StepWrapper }
-        StepWrapper step = new StepWrapper()
+        StepWrapper step = new StepWrapper(name: name, injector: LocalStepInjector)
 
         when:
-        binding.setVariable("test_step", step)
+        binding.setVariable(name, step)
 
         then:
-        binding.getStep("test_step") == step
+        binding.getStep(name) == step
     }
 
     @WithoutJenkins

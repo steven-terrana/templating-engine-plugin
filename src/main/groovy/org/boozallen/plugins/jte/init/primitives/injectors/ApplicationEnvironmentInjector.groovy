@@ -20,9 +20,7 @@ import jenkins.model.Jenkins
 import org.boozallen.plugins.jte.init.governance.config.dsl.PipelineConfigurationObject
 import org.boozallen.plugins.jte.init.primitives.PrimitiveNamespace
 import org.boozallen.plugins.jte.init.primitives.TemplateBinding
-import org.boozallen.plugins.jte.init.primitives.TemplatePrimitive
 import org.boozallen.plugins.jte.init.primitives.TemplatePrimitiveInjector
-import org.boozallen.plugins.jte.util.JTEException
 import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
 
 /**
@@ -38,6 +36,10 @@ import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
     }
 
     static private final String KEY = "application_environments"
+
+    static Class<? extends PrimitiveNamespace> getPrimitiveNamespaceClass(){
+        return Namespace
+    }
 
     @SuppressWarnings('NoDef')
     @Override
@@ -56,10 +58,6 @@ import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
             env.setPrevious(previous)
             env.setNext(next)
         }
-    }
-
-    static Class<? extends PrimitiveNamespace> getPrimitiveNamespaceClass(){
-        return Namespace
     }
 
     static class Namespace extends PrimitiveNamespace {

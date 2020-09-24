@@ -22,7 +22,6 @@ import org.boozallen.plugins.jte.init.primitives.PrimitiveNamespace
 import org.boozallen.plugins.jte.init.primitives.TemplateBinding
 import org.boozallen.plugins.jte.init.primitives.TemplatePrimitive
 import org.boozallen.plugins.jte.init.primitives.TemplatePrimitiveInjector
-import org.boozallen.plugins.jte.util.JTEException
 import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
 
 /**
@@ -39,6 +38,10 @@ import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
 
     private static final String KEY = "keywords"
 
+    static Class<? extends PrimitiveNamespace> getPrimitiveNamespaceClass(){
+        return Namespace
+    }
+
     @Override
     void injectPrimitives(FlowExecutionOwner flowOwner, PipelineConfigurationObject config, TemplateBinding binding){
         Class keywordClass = getPrimitiveClass()
@@ -50,10 +53,6 @@ import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
                 injector: this.getClass()
             ))
         }
-    }
-
-    static Class<? extends PrimitiveNamespace> getPrimitiveNamespaceClass(){
-        return Namespace
     }
 
     static class Namespace extends PrimitiveNamespace {

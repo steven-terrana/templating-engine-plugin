@@ -39,6 +39,10 @@ import org.jenkinsci.plugins.workflow.job.WorkflowJob
 
     private static final String KEY = "libraries"
 
+    static Class<? extends PrimitiveNamespace> getPrimitiveNamespaceClass(){
+        return Namespace
+    }
+
     @Override
     void validateConfiguration(FlowExecutionOwner flowOwner, PipelineConfigurationObject config){
         LinkedHashMap aggregatedConfig = config.getConfig()
@@ -95,10 +99,6 @@ import org.jenkinsci.plugins.workflow.job.WorkflowJob
             source.getLibraryProvider()
         } - null
         return providers
-    }
-
-    static Class<? extends PrimitiveNamespace> getPrimitiveNamespaceClass(){
-        return Namespace
     }
 
     static class Namespace extends PrimitiveNamespace {

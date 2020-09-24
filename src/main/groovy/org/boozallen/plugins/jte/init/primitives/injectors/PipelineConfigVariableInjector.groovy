@@ -31,6 +31,10 @@ import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
 
     static final String VARIABLE = "pipelineConfig"
 
+    static Class<? extends PrimitiveNamespace> getPrimitiveNamespaceClass(){
+        return Namespace
+    }
+
     @SuppressWarnings('NoDef')
     @Override
     void injectPrimitives(FlowExecutionOwner flowOwner, PipelineConfigurationObject config, TemplateBinding binding){
@@ -46,10 +50,6 @@ import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
         )
 
         binding.setVariable(VARIABLE, pipelineConfig)
-    }
-
-    static Class<? extends PrimitiveNamespace> getPrimitiveNamespaceClass(){
-        return Namespace
     }
 
     static class Namespace extends PrimitiveNamespace {

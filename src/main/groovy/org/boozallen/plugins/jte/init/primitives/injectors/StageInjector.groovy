@@ -21,7 +21,6 @@ import org.boozallen.plugins.jte.init.governance.config.dsl.PipelineConfiguratio
 import org.boozallen.plugins.jte.init.primitives.PrimitiveNamespace
 import org.boozallen.plugins.jte.init.primitives.RunAfter
 import org.boozallen.plugins.jte.init.primitives.TemplateBinding
-import org.boozallen.plugins.jte.init.primitives.TemplatePrimitive
 import org.boozallen.plugins.jte.init.primitives.TemplatePrimitiveInjector
 import org.boozallen.plugins.jte.util.JTEException
 import org.boozallen.plugins.jte.util.TemplateLogger
@@ -40,6 +39,10 @@ import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
     }
 
     private static final String KEY = "stages"
+
+    static Class<? extends PrimitiveNamespace> getPrimitiveNamespaceClass(){
+        return Namespace
+    }
 
     @Override
     @RunAfter([LibraryStepInjector, DefaultStepInjector, TemplateMethodInjector])
@@ -91,10 +94,6 @@ import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
         private static final long serialVersionUID = 1L
         String name
         Map args = [:]
-    }
-
-    static Class<? extends PrimitiveNamespace> getPrimitiveNamespaceClass(){
-        return Namespace
     }
 
     static class Namespace extends PrimitiveNamespace {

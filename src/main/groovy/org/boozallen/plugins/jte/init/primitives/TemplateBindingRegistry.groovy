@@ -28,14 +28,14 @@ class TemplateBindingRegistry implements Serializable{
     /**
      * The name used to reference the namespace collector from the pipeline
      */
-    static final String variableName = "jte"
+    static final String VARIABLE_NAME = "jte"
 
-    String getVariableName(){ return variableName }
+    String getVariableName(){ return VARIABLE_NAME }
 
     @Extension static class JTE extends ReservedVariableName{
-        @Override String getName(){ return variableName }
+        @Override String getName(){ return TemplateBindingRegistry.VARIABLE_NAME }
         @Override String getExceptionMessage(){
-            return "The variable name ${variableName} is reserved by JTE for the template primitive namespace"
+            return "The variable name ${VARIABLE_NAME} is reserved by JTE for the template primitive namespace"
         }
     }
 
@@ -89,5 +89,6 @@ class TemplateBindingRegistry implements Serializable{
     boolean isCase(Object o){
         return o in getVariables()
     }
+
 }
 

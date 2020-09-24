@@ -20,9 +20,7 @@ import org.boozallen.plugins.jte.init.governance.config.dsl.PipelineConfiguratio
 import org.boozallen.plugins.jte.init.primitives.PrimitiveNamespace
 import org.boozallen.plugins.jte.init.primitives.RunAfter
 import org.boozallen.plugins.jte.init.primitives.TemplateBinding
-import org.boozallen.plugins.jte.init.primitives.TemplatePrimitive
 import org.boozallen.plugins.jte.init.primitives.TemplatePrimitiveInjector
-import org.boozallen.plugins.jte.util.JTEException
 import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
 
 /**
@@ -32,6 +30,10 @@ import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
 @Extension class TemplateMethodInjector extends TemplatePrimitiveInjector {
 
     private static final String KEY = "template_methods"
+
+    static Class<? extends PrimitiveNamespace> getPrimitiveNamespaceClass(){
+        return Namespace
+    }
 
     @SuppressWarnings("ParameterName")
     @Override
@@ -44,10 +46,6 @@ import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
                 binding.setVariable(step, stepFactory.createNullStep(step, binding))
             }
         }
-    }
-
-    static Class<? extends PrimitiveNamespace> getPrimitiveNamespaceClass(){
-        return Namespace
     }
 
     static class Namespace extends PrimitiveNamespace {

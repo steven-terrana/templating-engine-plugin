@@ -1,5 +1,5 @@
 package org.boozallen.plugins.jte.init.primitives
-import org.boozallen.plugins.jte.init.primitives.TemplatePrimitive
+
 import org.boozallen.plugins.jte.util.JTEException
 
 /**
@@ -10,6 +10,7 @@ import org.boozallen.plugins.jte.util.JTEException
  * bar should be accessible via jte.foo.bar
  */
 class PrimitiveNamespace implements Serializable{
+
     private static final long serialVersionUID = 1L
     String name
     LinkedHashMap primitives = [:]
@@ -29,6 +30,7 @@ class PrimitiveNamespace implements Serializable{
         return this.@primitives
     }
 
+    @SuppressWarnings("NoDef")
     Object getProperty(String name){
         def meta = getClass().metaClass.getMetaProperty(name)
         if(meta){
@@ -45,4 +47,5 @@ class PrimitiveNamespace implements Serializable{
     Set<String> getVariables(){
         return this.primitives.keySet() as Set<String>
     }
+
 }
