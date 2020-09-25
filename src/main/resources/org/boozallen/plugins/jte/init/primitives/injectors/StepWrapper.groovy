@@ -100,16 +100,15 @@ class StepWrapper extends TemplatePrimitive implements Serializable, Cloneable{
      *
      * @return An equivalent StepWrapper instance
      */
+    @SuppressWarnings("UnnecessaryObjectReferences")
     Object clone(){
         Object that = super.clone()
-        that.with {
-            name = this.name
-            library = this.library
-            sourceText = this.sourceText
-            sourceFile = this.sourceFile
-            config = this.config
-            injector = this.injector
-        }
+        that.name = this.name
+        that.library = this.library
+        that.sourceText = this.sourceText
+        that.sourceFile = this.sourceFile
+        that.config = this.config
+        that.injector = this.injector
         return that
     }
 
