@@ -116,8 +116,8 @@ class TemplateBinding extends Binding implements Serializable{
     }
 
     // dont want to replace the property
-    Set<String> getRegistryValues(){
-        return Collections.unmodifiableSet(this.registry)
+    Set<String> getPrimitiveNames(){
+        return this.registry.getVariables()
     }
 
 }

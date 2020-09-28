@@ -49,7 +49,7 @@ import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
 
     // will probably become a method on the validation class
     List<String> checkPrimitiveCollisions(TemplateBinding templateBinding, hudson.model.Run run){
-        Set<String> registry = templateBinding.getRegistryValues()
+        Set<String> registry = templateBinding.getPrimitiveNames()
         List<String> functionNames = org.jenkinsci.plugins.workflow.steps.StepDescriptor.all()*.functionName
         Set<String> collisions = registry.intersect(functionNames)
 
