@@ -117,6 +117,11 @@ import org.jenkinsci.plugins.workflow.job.WorkflowJob
             return libraries*.getVariables().flatten() as Set<String>
         }
         Object getProperty(String name){
+            MetaProperty meta = getClass().metaClass.getMetaProperty(name)
+            if(meta){
+                return meta.getProperty(this)
+            }
+
             Library library = getLibrary(name)
             if(!library){
                 throw new JTEException("Library ${name} not found.")
@@ -136,6 +141,11 @@ import org.jenkinsci.plugins.workflow.job.WorkflowJob
                 return steps*.getName() as Set<String>
             }
             Object getProperty(String stepName){
+                MetaProperty meta = getClass().metaClass.getMetaProperty(name)
+                if(meta){
+                    return meta.getProperty(this)
+                }
+
                 Object step = steps.find{ s -> s.getName() == stepName }
                 if(!step){
                     throw new JTEException("JTE Library ${name} does not have step: ${stepName}")

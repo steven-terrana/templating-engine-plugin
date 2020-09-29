@@ -61,9 +61,15 @@ import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
     }
 
     static class Namespace extends PrimitiveNamespace {
+        static final String TYPE_DISPLAY_NAME =  "Application Environment"
         String name = KEY
+
+        String getTypeDisplayName(){
+            return TYPE_DISPLAY_NAME
+        }
+
         String getMissingPropertyMessage(String name){
-            return "Application Environment ${name} not found"
+            return "${getTypeDisplayName()} ${name} not found"
         }
     }
 

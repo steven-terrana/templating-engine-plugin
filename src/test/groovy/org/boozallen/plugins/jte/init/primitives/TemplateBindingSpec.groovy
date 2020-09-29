@@ -16,6 +16,7 @@
 package org.boozallen.plugins.jte.init.primitives
 
 import com.cloudbees.groovy.cps.NonCPS
+import hudson.model.TaskListener
 import org.boozallen.plugins.jte.init.primitives.injectors.StepWrapperFactory
 import org.boozallen.plugins.jte.job.AdHocTemplateFlowDefinition
 import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
@@ -158,9 +159,13 @@ class TemplateBindingSpec extends Specification{
     @WithoutJenkins
     def "binding collision post-lock throws post-lock exception"(){
         def name = "x"
+        def run = Mock(FlowExecutionOwner)
+        def listener = Mock(TaskListener)
+        listener.getLogger() >> Mock(PrintStream)
+        run.getListener() >> listener
         when:
         binding.setVariable(name, new LocalKeyword(name: name))
-        binding.lock()
+        binding.lock(run)
         binding.setVariable(name, 3)
 
         then:

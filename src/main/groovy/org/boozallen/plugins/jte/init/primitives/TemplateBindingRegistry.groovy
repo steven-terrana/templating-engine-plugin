@@ -17,6 +17,7 @@ package org.boozallen.plugins.jte.init.primitives
 
 import hudson.Extension
 import org.boozallen.plugins.jte.util.JTEException
+import org.boozallen.plugins.jte.util.TemplateLogger
 
 /**
  * Stores a run's TemplatePrimitives on individual namespaces for each type of primitive
@@ -88,6 +89,12 @@ class TemplateBindingRegistry implements Serializable{
      */
     boolean isCase(Object o){
         return o in getVariables()
+    }
+
+    void printAllPrimitives(TemplateLogger logger){
+        namespaces.each{ namespace ->
+            namespace.printAllPrimitives(logger)
+        }
     }
 
 }

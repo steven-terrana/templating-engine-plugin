@@ -41,7 +41,7 @@ class TemplateBindingFactory {
         invoke("validateConfiguration", flowOwner, config)
         invoke("injectPrimitives", flowOwner, config, templateBinding)
         invoke("validateBinding", flowOwner, config, templateBinding)
-        templateBinding.lock()
+        templateBinding.lock(flowOwner)
         return templateBinding
     }
 

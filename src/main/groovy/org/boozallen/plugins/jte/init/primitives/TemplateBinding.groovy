@@ -16,6 +16,7 @@
 package org.boozallen.plugins.jte.init.primitives
 
 import org.boozallen.plugins.jte.init.primitives.injectors.StepWrapperFactory
+import org.boozallen.plugins.jte.util.TemplateLogger
 import org.codehaus.groovy.runtime.InvokerHelper
 import org.jenkinsci.plugins.workflow.cps.DSL
 import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
@@ -46,7 +47,9 @@ class TemplateBinding extends Binding implements Serializable{
         variables.put(registry.getVariableName(), registry)
     }
 
-    void lock(){
+    void lock(FlowExecutionOwner flowOwner){
+        TemplateLogger logger = new TemplateLogger(flowOwner.getListener())
+        registry.printAllPrimitives(logger)
         locked = true
     }
 

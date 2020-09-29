@@ -1,6 +1,7 @@
 package org.boozallen.plugins.jte.init.primitives
 
 import org.boozallen.plugins.jte.util.JTEException
+import org.boozallen.plugins.jte.util.TemplateLogger
 
 /**
  * Subclasses of PrimitiveNamespace should overwrite getProperty to allow
@@ -12,6 +13,8 @@ import org.boozallen.plugins.jte.util.JTEException
 class PrimitiveNamespace implements Serializable{
 
     private static final long serialVersionUID = 1L
+    private static final String TYPE_DISPLAY_NAME = "Primitive"
+
     String name
     LinkedHashMap primitives = [:]
     /**
@@ -22,17 +25,20 @@ class PrimitiveNamespace implements Serializable{
         primitives[primitive.getName()] = primitive
     }
 
+    String getTypeDisplayName(){
+        return TYPE_DISPLAY_NAME
+    }
+
     String getMissingPropertyMessage(String name){
-        return "Primitive ${name} not found"
+        return "${getTypeDisplayName()} ${name} not found"
     }
 
     LinkedHashMap getPrimitives(){
         return this.@primitives
     }
 
-    @SuppressWarnings("NoDef")
     Object getProperty(String name){
-        def meta = getClass().metaClass.getMetaProperty(name)
+        MetaProperty meta = getClass().metaClass.getMetaProperty(name)
         if(meta){
             return meta.getProperty(this)
         }
@@ -41,11 +47,20 @@ class PrimitiveNamespace implements Serializable{
         }
         return getPrimitives()[name]
     }
+
     /**
      * @return the variable names of the primitives in this namespace
      */
     Set<String> getVariables(){
         return this.primitives.keySet() as Set<String>
+    }
+
+    void printAllPrimitives(TemplateLogger logger){
+        // default implementation
+        logger.print("Printing instance names for primitive type ${getTypeDisplayName()}")
+        variables.each { varName ->
+            logger.print( "${varName}\n")
+        }
     }
 
 }
