@@ -44,7 +44,6 @@ import java.lang.reflect.Method
         boolean a = permittedReceivers.collect{ r -> receiver in r }.contains(true)
         boolean b = receiver.getClass().getName() in permittedReceiverStrings
         return (a || b)
-
     }
 
     @Override

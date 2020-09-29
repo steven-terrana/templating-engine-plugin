@@ -95,12 +95,12 @@ class StepWrapper extends TemplatePrimitive implements Serializable, Cloneable{
     @NonCPS String getLibrary(){ return library }
     @NonCPS @Override Class<? extends TemplatePrimitiveInjector> getInjector(){ return injector }
 
-
     /**
      * clones this StepWrapper
      *
      * @return An equivalent StepWrapper instance
      */
+    @SuppressWarnings("UnnecessaryObjectReferences")
     Object clone(){
         Object that = super.clone()
         that.name = this.name
