@@ -102,13 +102,28 @@ import org.jenkinsci.plugins.workflow.job.WorkflowJob
     }
 
     static class Namespace extends PrimitiveNamespace {
+        private static final String TYPE_DISPLAY_NAME = "Step"
         String name = KEY
-        List<Library> libraries = []
+        List<StepNamespace> libraries = []
+        @Override
+        String getTypeDisplayName(){
+            return TYPE_DISPLAY_NAME
+        }
+
+        @Override
+        void printAllPrimitives(TemplateLogger logger){
+            // default implementation
+            logger.print("Printing step names for libraries")
+            variables.each { varName ->
+                logger.print( "${varName}\n")
+            }
+        }
+
         @Override void add(TemplatePrimitive primitive){
             String libName = primitive.getLibrary()
-            Library library = getLibrary(libName)
+            StepNamespace library = getLibrary(libName)
             if(!library){
-                library = new Library(name: libName)
+                library = new StepNamespace(name: libName)
                 libraries.push(library)
             }
             library.add(primitive)
@@ -122,37 +137,16 @@ import org.jenkinsci.plugins.workflow.job.WorkflowJob
                 return meta.getProperty(this)
             }
 
-            Library library = getLibrary(name)
+            StepNamespace library = getLibrary(name)
             if(!library){
                 throw new JTEException("Library ${name} not found.")
             }
             return library
         }
-        private Library getLibrary(String name){
+        private StepNamespace getLibrary(String name){
             return libraries.find{ l -> l.getName() == name }
         }
-        static class Library extends PrimitiveNamespace{
-            String name
-            List steps = []
-            @Override void add(TemplatePrimitive step){
-                steps.push(step)
-            }
-            @Override Set<String> getVariables(){
-                return steps*.getName() as Set<String>
-            }
-            Object getProperty(String stepName){
-                MetaProperty meta = getClass().metaClass.getMetaProperty(name)
-                if(meta){
-                    return meta.getProperty(this)
-                }
 
-                Object step = steps.find{ s -> s.getName() == stepName }
-                if(!step){
-                    throw new JTEException("JTE Library ${name} does not have step: ${stepName}")
-                }
-                return step
-            }
-        }
     }
 
 }
