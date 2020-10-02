@@ -22,6 +22,7 @@ import org.jenkinsci.plugins.workflow.job.WorkflowJob
 import org.junit.ClassRule
 import org.jvnet.hudson.test.JenkinsRule
 import org.jvnet.hudson.test.WithoutJenkins
+import spock.lang.Ignore
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -290,7 +291,7 @@ class TemplateBindingRegistrySpec extends Specification{
         WorkflowJob job = TestUtil.createAdHoc(jenkins,
             config: "libraries{ exampleLibrary }",
             template: """
-            x = returnsSomething()
+            x = jte.libraries.exampleLibrary.returnsSomething()
             println "x=\${x}"
             """
         )
@@ -415,16 +416,23 @@ class TemplateBindingRegistrySpec extends Specification{
         jenkins.assertLogContains("step: A", run)
     }
 
-    def "library resource can be fetched within a step"(){
+    @Ignore
+    def "Namespaced Default Step invoked"(){
         given:
         def run
-        WorkflowJob job = TestUtil.createAdHoc(jenkins,
-            config: """
+        WorkflowJob job = TestUtil.createAdHoc(jenkins, config: """
             libraries{
-                resourcesA
+                libA
+                libB
             }
-            """,
-            template: 'fetchResource()'
+
+            steps{
+              stepD{
+                 image = "alpine:latest"
+                 command = "echo 'step: D'"
+              }
+            }
+            """, template: 'jte.steps.stepD()'
         )
 
         when:
@@ -432,19 +440,24 @@ class TemplateBindingRegistrySpec extends Specification{
 
         then:
         jenkins.assertBuildStatusSuccess(run)
-        jenkins.assertLogContains("my resource from resourcesA", run)
+        jenkins.assertLogContains("step: D", run)
     }
 
-    def "library resource method can't be called from outside a step"(){
+    def "Incorrectly Namespaced Library Step call throws MissingMethodException"(){
         given:
         def run
-        WorkflowJob job = TestUtil.createAdHoc(jenkins,
-            config: """
+        WorkflowJob job = TestUtil.createAdHoc(jenkins, config: """
             libraries{
-                resourcesA
+                libA
+                libB
             }
-            """,
-            template: 'resource("myResource.txt)'
+
+            steps{
+              stepD{
+                 command = "echo 'stepB'"
+              }
+            }
+            """, template: 'jte.libraries.libB.stepD()'
         )
 
         when:
@@ -452,89 +465,7 @@ class TemplateBindingRegistrySpec extends Specification{
 
         then:
         jenkins.assertBuildStatus(Result.FAILURE, run)
-        jenkins.assertLogNotContains("my resource from resourcesA", run)
-    }
-
-    def "nested library resource can be fetched within a step"(){
-        given:
-        def run
-        WorkflowJob job = TestUtil.createAdHoc(jenkins,
-            config: """
-            libraries{
-                resourcesA
-            }
-            """,
-            template: 'fetchNestedResource()'
-        )
-
-        when:
-        run = job.scheduleBuild2(0).get()
-
-        then:
-        jenkins.assertBuildStatusSuccess(run)
-        jenkins.assertLogContains("hello, world", run)
-    }
-
-    def "step can only retrieve resource from own library"(){
-        given:
-        def run
-        WorkflowJob job = TestUtil.createAdHoc(jenkins,
-            config: """
-            libraries{
-                resourcesA
-                resourcesB
-            }
-            """,
-            template: 'fetchNestedResource(); fetchCrossLibrary()'
-        )
-
-        when:
-        run = job.scheduleBuild2(0).get()
-
-        then:
-        jenkins.assertBuildStatus(Result.FAILURE, run)
-        jenkins.assertLogContains("hello, world", run)
-        jenkins.assertLogContains("JTE: library step requested a resource 'nested/somethingElse.txt' that does not exist", run)
-    }
-
-    def "step fetching non-existent resource throws exception"(){
-        given:
-        def run
-        WorkflowJob job = TestUtil.createAdHoc(jenkins,
-            config: """
-            libraries{
-                resourcesB
-            }
-            """,
-            template: 'doesNotExist()'
-        )
-
-        when:
-        run = job.scheduleBuild2(0).get()
-
-        then:
-        jenkins.assertBuildStatus(Result.FAILURE, run)
-        jenkins.assertLogContains("JTE: library step requested a resource 'nope.txt' that does not exist", run)
-    }
-
-    def "step fetching resource with absolute path throws exception"(){
-        given:
-        def run
-        WorkflowJob job = TestUtil.createAdHoc(jenkins,
-            config: """
-            libraries{
-                resourcesB
-            }
-            """,
-            template: 'absolutePath()'
-        )
-
-        when:
-        run = job.scheduleBuild2(0).get()
-
-        then:
-        jenkins.assertBuildStatus(Result.FAILURE, run)
-        jenkins.assertLogContains("JTE: library step requested a resource that is not a relative path.", run)
+        jenkins.assertLogContains("MissingMethodException", run)
     }
 
     @WithoutJenkins

@@ -22,25 +22,13 @@ import org.boozallen.plugins.jte.init.primitives.PrimitiveNamespace
  */
 class StepNamespace extends PrimitiveNamespace{
 
+    String getName(){
+        return super.name ?: "steps"
+    }
+
     @Override
     String getTypeDisplayName() {
         return "Step"
-    }
-
-    /**
-     * implemented because namespaced call did not work
-     * @param name
-     * @param args
-     * @return
-     */
-    @Override
-    Object invokeMethod(String name, Object args) {
-        Object step = primitives[name]
-        if(step){
-            return step(args)
-        }
-
-        return super.invokeMethod(name, args)
     }
 
     /**
@@ -56,7 +44,8 @@ class StepNamespace extends PrimitiveNamespace{
             return step(args)
         }
 
-        return super.methodMissing(name, args)
+        throw new MissingMethodException(name, this.getClass(), args)
+        //return null // super.methodMissing(name, args)
     }
 
 }

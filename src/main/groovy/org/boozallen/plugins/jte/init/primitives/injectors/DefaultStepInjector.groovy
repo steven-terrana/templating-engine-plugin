@@ -33,7 +33,7 @@ import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
     private static final String KEY = "steps"
 
     static Class<? extends PrimitiveNamespace> getPrimitiveNamespaceClass(){
-        return Namespace
+        return StepNamespace
     }
 
     @Override
