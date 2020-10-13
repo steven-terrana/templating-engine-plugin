@@ -75,7 +75,7 @@ class TemplateBinding extends Binding implements Serializable{
          * added to the binding
          */
         if (value in TemplatePrimitive){
-            registry.add(value)
+            registry.add(value as TemplatePrimitive)
         }
         super.setVariable(name, value)
     }

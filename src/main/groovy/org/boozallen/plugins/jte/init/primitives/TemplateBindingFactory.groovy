@@ -37,8 +37,8 @@ import java.lang.reflect.Method
 class TemplateBindingFactory {
 
     static TemplateBinding create(FlowExecutionOwner flowOwner, PipelineConfigurationObject config){
-        TemplateBinding templateBinding = new TemplateBinding(flowOwner)
         invoke("validateConfiguration", flowOwner, config)
+        TemplateBinding templateBinding = new TemplateBinding(flowOwner)
         invoke("injectPrimitives", flowOwner, config, templateBinding)
         invoke("validateBinding", flowOwner, config, templateBinding)
         templateBinding.lock(flowOwner)

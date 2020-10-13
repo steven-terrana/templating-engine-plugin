@@ -38,9 +38,15 @@ import org.jenkinsci.plugins.workflow.job.WorkflowJob
 @Extension class LibraryStepInjector extends TemplatePrimitiveInjector {
 
     private static final String KEY = "libraries"
+    private static final String TYPE_DISPLAY_NAME = "Library"
+    private static final String NAMESPACE_KEY = KEY
 
-    static Class<? extends PrimitiveNamespace> getPrimitiveNamespaceClass(){
-        return Namespace
+    static PrimitiveNamespace createNamespace(){
+        return new Namespace(name: getNamespaceKey(), typeDisplayName: TYPE_DISPLAY_NAME)
+    }
+
+    static String getNamespaceKey(){
+        return NAMESPACE_KEY
     }
 
     @Override

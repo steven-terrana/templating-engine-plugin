@@ -31,9 +31,15 @@ import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
 @Extension class DefaultStepInjector extends TemplatePrimitiveInjector {
 
     private static final String KEY = "steps"
+    private static final String TYPE_DISPLAY_NAME = "Default Step"
+    private static final String NAMESPACE_KEY = KEY
 
-    static Class<? extends PrimitiveNamespace> getPrimitiveNamespaceClass(){
-        return StepNamespace
+    static PrimitiveNamespace createNamespace(){
+        return new StepNamespace(name: getNamespaceKey(), typeDisplayName: TYPE_DISPLAY_NAME)
+    }
+
+    static String getNamespaceKey(){
+        return NAMESPACE_KEY
     }
 
     @Override
@@ -54,13 +60,6 @@ import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
                 logger.print "Creating step ${stepName} from the default step implementation."
                 binding.setVariable(stepName, stepFactory.createDefaultStep(binding, stepName, stepConfig))
             }
-        }
-    }
-
-    static class Namespace extends PrimitiveNamespace {
-        String name = KEY
-        String getMissingPropertyMessage(String name){
-            return "Default Step ${name} not found"
         }
     }
 

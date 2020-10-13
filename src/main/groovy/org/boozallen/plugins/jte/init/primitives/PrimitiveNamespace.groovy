@@ -15,9 +15,14 @@ class PrimitiveNamespace implements Serializable{
     private static final long serialVersionUID = 1L
     private static final String TYPE_DISPLAY_NAME = "Primitive"
 
+    /**
+     * the key/name for this namespace
+     */
     protected String name
     LinkedHashMap primitives = [:]
     String typeDisplayName = TYPE_DISPLAY_NAME
+
+    TemplatePrimitiveInjector primitiveInjector
 
     /**
      * Add a new primitive to the namespace
@@ -25,6 +30,10 @@ class PrimitiveNamespace implements Serializable{
      */
     void add(TemplatePrimitive primitive){
         primitives[primitive.getName()] = primitive
+    }
+
+    String getName(){
+        return name
     }
 
     String getTypeDisplayName(){

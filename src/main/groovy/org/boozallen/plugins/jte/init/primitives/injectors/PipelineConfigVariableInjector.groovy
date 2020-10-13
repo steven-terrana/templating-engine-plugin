@@ -30,9 +30,15 @@ import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
 @Extension class PipelineConfigVariableInjector extends TemplatePrimitiveInjector {
 
     static final String VARIABLE = "pipelineConfig"
+    private static final String TYPE_DISPLAY_NAME = "Pipeline Config"
+    private static final String NAMESPACE_KEY = VARIABLE
 
-    static Class<? extends PrimitiveNamespace> getPrimitiveNamespaceClass(){
-        return Namespace
+    static PrimitiveNamespace createNamespace(){
+        return new Namespace(name: getNamespaceKey(), typeDisplayName: TYPE_DISPLAY_NAME)
+    }
+
+    static String getNamespaceKey(){
+        return NAMESPACE_KEY
     }
 
     @SuppressWarnings('NoDef')

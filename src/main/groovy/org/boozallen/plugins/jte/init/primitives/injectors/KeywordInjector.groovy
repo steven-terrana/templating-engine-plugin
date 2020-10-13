@@ -37,9 +37,15 @@ import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
     }
 
     private static final String KEY = "keywords"
+    private static final String TYPE_DISPLAY_NAME = "Keyword"
+    private static final String NAMESPACE_KEY = KEY
 
-    static Class<? extends PrimitiveNamespace> getPrimitiveNamespaceClass(){
-        return Namespace
+    static PrimitiveNamespace createNamespace(){
+        return new Namespace(name: getNamespaceKey(), typeDisplayName: TYPE_DISPLAY_NAME)
+    }
+
+    static String getNamespaceKey(){
+        return NAMESPACE_KEY
     }
 
     @Override
@@ -56,10 +62,6 @@ import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
     }
 
     static class Namespace extends PrimitiveNamespace {
-        String name = KEY
-        String getMissingPropertyMessage(String name){
-            return "Keyword ${name} not found"
-        }
         @Override void add(TemplatePrimitive primitive){
             String name = primitive.getName()
             primitives[name] = primitive.getValue()

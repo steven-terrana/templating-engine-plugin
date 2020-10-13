@@ -26,11 +26,6 @@ class StepNamespace extends PrimitiveNamespace{
         return super.name ?: "steps"
     }
 
-    @Override
-    String getTypeDisplayName() {
-        return "Step"
-    }
-
     /**
      * should probably only override one
      * implemented because call(){ jte.libraries.$library.$step(...)} did not work
