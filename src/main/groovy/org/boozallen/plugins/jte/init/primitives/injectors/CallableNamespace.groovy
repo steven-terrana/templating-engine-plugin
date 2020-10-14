@@ -20,7 +20,7 @@ import org.boozallen.plugins.jte.init.primitives.PrimitiveNamespace
 /**
  * library step namespace under libraries namespace
  */
-class StepNamespace extends PrimitiveNamespace{
+class CallableNamespace extends PrimitiveNamespace{
 
     String getName(){
         return super.name ?: "steps"

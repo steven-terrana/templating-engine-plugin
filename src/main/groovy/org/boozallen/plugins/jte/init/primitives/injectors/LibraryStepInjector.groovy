@@ -110,7 +110,7 @@ import org.jenkinsci.plugins.workflow.job.WorkflowJob
     static class Namespace extends PrimitiveNamespace {
         private static final String TYPE_DISPLAY_NAME = "Step"
         String name = KEY
-        List<StepNamespace> libraries = []
+        List<CallableNamespace> libraries = []
         @Override
         String getTypeDisplayName(){
             return TYPE_DISPLAY_NAME
@@ -127,9 +127,9 @@ import org.jenkinsci.plugins.workflow.job.WorkflowJob
 
         @Override void add(TemplatePrimitive primitive){
             String libName = primitive.getLibrary()
-            StepNamespace library = getLibrary(libName)
+            CallableNamespace library = getLibrary(libName)
             if(!library){
-                library = new StepNamespace(name: libName)
+                library = new CallableNamespace(name: libName)
                 libraries.push(library)
             }
             library.add(primitive)
@@ -143,13 +143,13 @@ import org.jenkinsci.plugins.workflow.job.WorkflowJob
                 return meta.getProperty(this)
             }
 
-            StepNamespace library = getLibrary(name)
+            CallableNamespace library = getLibrary(name)
             if(!library){
                 throw new JTEException("Library ${name} not found.")
             }
             return library
         }
-        private StepNamespace getLibrary(String name){
+        private CallableNamespace getLibrary(String name){
             return libraries.find{ l -> l.getName() == name }
         }
 

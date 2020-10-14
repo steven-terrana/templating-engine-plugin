@@ -43,7 +43,7 @@ import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
     private static final String NAMESPACE_KEY = KEY
 
     static PrimitiveNamespace createNamespace(){
-        return new StepNamespace(name: getNamespaceKey(), typeDisplayName: TYPE_DISPLAY_NAME)
+        return new CallableNamespace(name: getNamespaceKey(), typeDisplayName: TYPE_DISPLAY_NAME)
     }
 
     static String getNamespaceKey(){
