@@ -118,7 +118,10 @@ class TemplateBinding extends Binding implements Serializable{
         throw new TemplateException("No step ${stepName} has been loaded")
     }
 
-    // dont want to replace the property
+    /**
+     * retrieves all the primitives names/keys
+     * @return
+     */
     Set<String> getPrimitiveNames(){
         return this.registry.getVariables()
     }
