@@ -64,9 +64,12 @@ import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
         @Override void add(TemplatePrimitive primitive){
             pipelineConfig = primitive.getValue()
         }
+
+        @Override
         Set<String> getVariables(){
             return [ VARIABLE ]
         }
+
         Object getProperty(String name){
             return pipelineConfig[name]
         }
