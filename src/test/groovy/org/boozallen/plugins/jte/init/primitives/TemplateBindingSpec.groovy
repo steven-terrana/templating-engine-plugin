@@ -55,37 +55,13 @@ class TemplateBindingSpec extends Specification{
 
     static class TestInjector extends TemplatePrimitiveInjector{
 
-        static Class<? extends TemplatePrimitive> getPrimitiveNamespaceClass(){
-            return TestNamespace
-        }
-    }
-
-    static class TestNamespace extends PrimitiveNamespace {
-        @Override
-        String getMissingPropertyMessage(String name) {
-            return "Missing Test Primitive ${name}"
-        }
     }
 
     static class LocalKeywordInjector extends TemplatePrimitiveInjector{
 
-        static Class<? extends TemplatePrimitive> getPrimitiveNamespaceClass(){
-            return LocalKeywordNamespace
-        }
-    }
-
-    static class LocalKeywordNamespace extends PrimitiveNamespace {
-        @Override
-        String getMissingPropertyMessage(String name) {
-            return "Missing Keyword ${name}"
-        }
     }
 
     static class LocalStepInjector extends TemplatePrimitiveInjector{
-
-        static Class<? extends TemplatePrimitive> getPrimitiveNamespaceClass(){
-            return LocalStepNamespace
-        }
     }
 
     /**
@@ -106,13 +82,6 @@ class TemplateBindingSpec extends Specification{
      * mock StepWrapper primitive for test
      */
     class StepWrapper extends TestPrimitive{}
-
-    static class LocalStepNamespace extends PrimitiveNamespace {
-        @Override
-        String getMissingPropertyMessage(String name) {
-            return "Missing Step ${name}"
-        }
-    }
 
     @WithoutJenkins
     def "non-primitive variable set in binding maintains value"(){
