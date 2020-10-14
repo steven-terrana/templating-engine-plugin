@@ -15,6 +15,8 @@
 */
 package org.boozallen.plugins.jte.init.primitives
 
+import com.cloudbees.groovy.cps.NonCPS
+
 /**
  * Objects whose class extends TemplatePrimitive will be protected in the {@link TemplateBinding} from
  * being inadvertently overridden
@@ -25,6 +27,9 @@ abstract class TemplatePrimitive implements Serializable{
 
     Class<? extends TemplatePrimitiveInjector> injector
     String name
+
+    @NonCPS
+    Object getValue(){ return this }
 
     /**
      * Invoked if an object with this class were to be overridden in the {@link TemplateBinding} during initialization
