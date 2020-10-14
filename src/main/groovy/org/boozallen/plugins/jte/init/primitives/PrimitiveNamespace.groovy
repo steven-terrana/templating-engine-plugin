@@ -29,7 +29,7 @@ class PrimitiveNamespace implements Serializable{
      * @param primitive the primitive to be added
      */
     void add(TemplatePrimitive primitive){
-        primitives[primitive.getName()] = primitive
+        primitives[primitive.getName()] = primitive.getValue()
     }
 
     String getName(){
