@@ -33,7 +33,6 @@ import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
     @Override
     void validateBinding(FlowExecutionOwner flowOwner, PipelineConfigurationObject config, TemplateBinding binding) {
         List<String> collisions = checkPrimitiveCollisions( binding, flowOwner.getExecutable())
-        TemplateLogger logger = new TemplateLogger(flowOwner.getListener())
 
         if( collisions ){
             List<String> warnings = [
@@ -43,6 +42,7 @@ import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
                 warnings << "- ${name}: ${warningMsg}"
             }
 
+            TemplateLogger logger = new TemplateLogger(flowOwner.getListener())
             logger.print(warnings.join("\n"))
         }
     }
