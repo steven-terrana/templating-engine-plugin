@@ -68,7 +68,7 @@ class PrimitiveNamespace implements Serializable{
 
     void printAllPrimitives(TemplateLogger logger){
         // default implementation
-        logger.print( "Printing names for primitive type: ${getTypeDisplayName()}\n" + getVariables().join("\n") )
+        logger.print( "created ${getTypeDisplayName()}s\n" + getVariables().join("\n") )
     }
 
 }
