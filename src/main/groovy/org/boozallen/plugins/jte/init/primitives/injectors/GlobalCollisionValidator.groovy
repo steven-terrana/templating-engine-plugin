@@ -16,19 +16,21 @@
 package org.boozallen.plugins.jte.init.primitives.injectors
 
 import hudson.Extension
+import hudson.model.Run
 import org.boozallen.plugins.jte.init.governance.config.dsl.PipelineConfigurationObject
 import org.boozallen.plugins.jte.init.primitives.TemplateBinding
 import org.boozallen.plugins.jte.init.primitives.TemplatePrimitiveInjector
 import org.boozallen.plugins.jte.util.TemplateLogger
+import org.jenkinsci.plugins.workflow.cps.GlobalVariable
 import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
+import org.jenkinsci.plugins.workflow.steps.StepDescriptor
 
 /**
  * checks for collisions between TemplateBinding primitives and Jenkins globals and steps
  */
 @Extension class GlobalCollisionValidator extends TemplatePrimitiveInjector{
 
-    static String warningHeading = "There are JTE Primitives that have naming collisions with Jenkins globals and/or steps"
-    static String warningMsg = " has a Jenkins global/step collision"
+    static String warningHeading = "JTE Primitives overrode Plugin provided steps and/or variables:"
 
     @Override
     void validateBinding(FlowExecutionOwner flowOwner, PipelineConfigurationObject config, TemplateBinding binding) {
@@ -39,22 +41,22 @@ import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
                     warningHeading,
             ]
             collisions.each{ name ->
-                warnings << "- ${name}: ${warningMsg}"
+                warnings << "- ${name}"
             }
 
             TemplateLogger logger = new TemplateLogger(flowOwner.getListener())
-            logger.print(warnings.join("\n"))
+            logger.printWarning(warnings.join("\n"))
         }
     }
 
     // will probably become a method on the validation class
-    List<String> checkPrimitiveCollisions(TemplateBinding templateBinding, hudson.model.Run run){
+    List<String> checkPrimitiveCollisions(TemplateBinding templateBinding, Run run){
         Set<String> registry = templateBinding.getPrimitiveNames()
-        List<String> functionNames = org.jenkinsci.plugins.workflow.steps.StepDescriptor.all()*.functionName
+        List<String> functionNames = StepDescriptor.all()*.functionName
         Set<String> collisions = registry.intersect(functionNames)
 
         collisions += registry.collect { key ->
-            org.jenkinsci.plugins.workflow.cps.GlobalVariable.byName(key, run)
+            GlobalVariable.byName(key, run)
         }.findAll{ g -> null != g }
 
         return new ArrayList<String>(collisions as Collection<String>)

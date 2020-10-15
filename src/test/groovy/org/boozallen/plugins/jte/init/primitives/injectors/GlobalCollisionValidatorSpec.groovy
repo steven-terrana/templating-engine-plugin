@@ -56,7 +56,6 @@ class GlobalCollisionValidatorSpec extends Specification{
         then:
         jenkins.assertBuildStatus(Result.SUCCESS, run)
         jenkins.assertLogContains(GlobalCollisionValidator.warningHeading, run)
-        jenkins.assertLogContains(GlobalCollisionValidator.warningMsg, run)
         jenkins.assertLogContains("build", run)
     }
 
