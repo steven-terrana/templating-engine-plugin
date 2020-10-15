@@ -108,21 +108,12 @@ import org.jenkinsci.plugins.workflow.job.WorkflowJob
     }
 
     static class Namespace extends PrimitiveNamespace {
-        private static final String TYPE_DISPLAY_NAME = "Step"
         String name = KEY
         List<CallableNamespace> libraries = []
-        @Override
-        String getTypeDisplayName(){
-            return TYPE_DISPLAY_NAME
-        }
 
         @Override
         void printAllPrimitives(TemplateLogger logger){
-            // default implementation
-            logger.print("Printing step names for libraries")
-            variables.each { varName ->
-                logger.print( "${varName}\n")
-            }
+            logger.print( "Printing names for primitive type: ${getTypeDisplayName()}\n" + getVariablesWithLibraryName().join("\n") )
         }
 
         @Override void add(TemplatePrimitive primitive){
@@ -134,9 +125,17 @@ import org.jenkinsci.plugins.workflow.job.WorkflowJob
             }
             library.add(primitive)
         }
+
         @Override Set<String> getVariables(){
             return libraries*.getVariables().flatten() as Set<String>
         }
+
+        Set<String> getVariablesWithLibraryName(){
+            return libraries.collect{ lib ->
+                lib.getVariables().collect { var -> "${lib.name}.${var}" }
+            }.flatten() as Set<String>
+        }
+
         Object getProperty(String name){
             MetaProperty meta = getClass().metaClass.getMetaProperty(name)
             if(meta){
