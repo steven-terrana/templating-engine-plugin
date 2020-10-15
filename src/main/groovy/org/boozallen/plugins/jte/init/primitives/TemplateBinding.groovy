@@ -16,6 +16,7 @@
 package org.boozallen.plugins.jte.init.primitives
 
 import org.boozallen.plugins.jte.init.primitives.injectors.StepWrapperFactory
+import org.boozallen.plugins.jte.util.TemplateLogger
 import org.codehaus.groovy.runtime.InvokerHelper
 import org.jenkinsci.plugins.workflow.cps.DSL
 import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
@@ -46,7 +47,9 @@ class TemplateBinding extends Binding implements Serializable{
         variables.put(registry.getVariableName(), registry)
     }
 
-    void lock(){
+    void lock(FlowExecutionOwner flowOwner){
+        TemplateLogger logger = new TemplateLogger(flowOwner.getListener())
+        registry.printAllPrimitives(logger)
         locked = true
     }
 
@@ -72,7 +75,7 @@ class TemplateBinding extends Binding implements Serializable{
          * added to the binding
          */
         if (value in TemplatePrimitive){
-            registry.add(value)
+            registry.add(value as TemplatePrimitive)
         }
         super.setVariable(name, value)
     }
@@ -113,6 +116,14 @@ class TemplateBinding extends Binding implements Serializable{
             return getVariable(stepName)
         }
         throw new TemplateException("No step ${stepName} has been loaded")
+    }
+
+    /**
+     * retrieves all the primitives names/keys
+     * @return
+     */
+    Set<String> getPrimitiveNames(){
+        return this.registry.getVariables()
     }
 
 }

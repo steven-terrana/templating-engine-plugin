@@ -70,6 +70,22 @@ abstract class TemplatePrimitiveInjector implements ExtensionPoint{
     }
 
     /**
+     * factory method to create the associated namespace
+     * @return
+     */
+    static PrimitiveNamespace createNamespace(){
+        return new PrimitiveNamespace(name: getNamespaceKey())
+    }
+
+    /**
+     * the key for the namespace
+     * @return
+     */
+    static String getNamespaceKey(){
+        return "primitives"
+    }
+
+    /**
      * Used to validate the pipeline configuration is structurally correct
      * @param flowOwner the run's flowOwner
      * @param config the aggregated pipeline configuration

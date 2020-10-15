@@ -39,9 +39,15 @@ import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
     }
 
     private static final String KEY = "stages"
+    private static final String TYPE_DISPLAY_NAME = "Stage"
+    private static final String NAMESPACE_KEY = KEY
 
-    static Class<? extends PrimitiveNamespace> getPrimitiveNamespaceClass(){
-        return Namespace
+    static PrimitiveNamespace createNamespace(){
+        return new CallableNamespace(name: getNamespaceKey(), typeDisplayName: TYPE_DISPLAY_NAME)
+    }
+
+    static String getNamespaceKey(){
+        return NAMESPACE_KEY
     }
 
     @Override
@@ -94,13 +100,6 @@ import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
         private static final long serialVersionUID = 1L
         String name
         Map args = [:]
-    }
-
-    static class Namespace extends PrimitiveNamespace {
-        String name = KEY
-        String getMissingPropertyMessage(String name){
-            return "Stage ${name} not found"
-        }
     }
 
 }

@@ -1,6 +1,7 @@
 package org.boozallen.plugins.jte.init.primitives
 
 import org.boozallen.plugins.jte.util.JTEException
+import org.boozallen.plugins.jte.util.TemplateLogger
 
 /**
  * Subclasses of PrimitiveNamespace should overwrite getProperty to allow
@@ -12,27 +13,43 @@ import org.boozallen.plugins.jte.util.JTEException
 class PrimitiveNamespace implements Serializable{
 
     private static final long serialVersionUID = 1L
-    String name
+    private static final String TYPE_DISPLAY_NAME = "Primitive"
+
+    /**
+     * the key/name for this namespace
+     */
+    protected String name
     LinkedHashMap primitives = [:]
+    String typeDisplayName = TYPE_DISPLAY_NAME
+
+    TemplatePrimitiveInjector primitiveInjector
+
     /**
      * Add a new primitive to the namespace
      * @param primitive the primitive to be added
      */
     void add(TemplatePrimitive primitive){
-        primitives[primitive.getName()] = primitive
+        primitives[primitive.getName()] = primitive.getValue()
+    }
+
+    String getName(){
+        return name
+    }
+
+    String getTypeDisplayName(){
+        return typeDisplayName
     }
 
     String getMissingPropertyMessage(String name){
-        return "Primitive ${name} not found"
+        return "${getTypeDisplayName()} ${name} not found"
     }
 
     LinkedHashMap getPrimitives(){
         return this.@primitives
     }
 
-    @SuppressWarnings("NoDef")
     Object getProperty(String name){
-        def meta = getClass().metaClass.getMetaProperty(name)
+        MetaProperty meta = getClass().metaClass.getMetaProperty(name)
         if(meta){
             return meta.getProperty(this)
         }
@@ -41,11 +58,17 @@ class PrimitiveNamespace implements Serializable{
         }
         return getPrimitives()[name]
     }
+
     /**
      * @return the variable names of the primitives in this namespace
      */
     Set<String> getVariables(){
         return this.primitives.keySet() as Set<String>
+    }
+
+    void printAllPrimitives(TemplateLogger logger){
+        // default implementation
+        logger.print( "created ${getTypeDisplayName()}s:\n" + getVariables().join("\n") )
     }
 
 }

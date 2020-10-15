@@ -16,6 +16,7 @@
 package org.boozallen.plugins.jte.init.primitives
 
 import com.cloudbees.groovy.cps.NonCPS
+import hudson.model.TaskListener
 import org.boozallen.plugins.jte.init.primitives.injectors.StepWrapperFactory
 import org.boozallen.plugins.jte.job.AdHocTemplateFlowDefinition
 import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
@@ -54,37 +55,13 @@ class TemplateBindingSpec extends Specification{
 
     static class TestInjector extends TemplatePrimitiveInjector{
 
-        static Class<? extends TemplatePrimitive> getPrimitiveNamespaceClass(){
-            return TestNamespace
-        }
-    }
-
-    static class TestNamespace extends PrimitiveNamespace {
-        @Override
-        String getMissingPropertyMessage(String name) {
-            return "Missing Test Primitive ${name}"
-        }
     }
 
     static class LocalKeywordInjector extends TemplatePrimitiveInjector{
 
-        static Class<? extends TemplatePrimitive> getPrimitiveNamespaceClass(){
-            return LocalKeywordNamespace
-        }
-    }
-
-    static class LocalKeywordNamespace extends PrimitiveNamespace {
-        @Override
-        String getMissingPropertyMessage(String name) {
-            return "Missing Keyword ${name}"
-        }
     }
 
     static class LocalStepInjector extends TemplatePrimitiveInjector{
-
-        static Class<? extends TemplatePrimitive> getPrimitiveNamespaceClass(){
-            return LocalStepNamespace
-        }
     }
 
     /**
@@ -105,13 +82,6 @@ class TemplateBindingSpec extends Specification{
      * mock StepWrapper primitive for test
      */
     class StepWrapper extends TestPrimitive{}
-
-    static class LocalStepNamespace extends PrimitiveNamespace {
-        @Override
-        String getMissingPropertyMessage(String name) {
-            return "Missing Step ${name}"
-        }
-    }
 
     @WithoutJenkins
     def "non-primitive variable set in binding maintains value"(){
@@ -158,9 +128,13 @@ class TemplateBindingSpec extends Specification{
     @WithoutJenkins
     def "binding collision post-lock throws post-lock exception"(){
         def name = "x"
+        def run = Mock(FlowExecutionOwner)
+        def listener = Mock(TaskListener)
+        listener.getLogger() >> Mock(PrintStream)
+        run.getListener() >> listener
         when:
         binding.setVariable(name, new LocalKeyword(name: name))
-        binding.lock()
+        binding.lock(run)
         binding.setVariable(name, 3)
 
         then:

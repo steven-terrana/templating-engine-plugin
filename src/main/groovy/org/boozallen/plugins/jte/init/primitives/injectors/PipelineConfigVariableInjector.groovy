@@ -21,6 +21,7 @@ import org.boozallen.plugins.jte.init.primitives.PrimitiveNamespace
 import org.boozallen.plugins.jte.init.primitives.TemplateBinding
 import org.boozallen.plugins.jte.init.primitives.TemplatePrimitive
 import org.boozallen.plugins.jte.init.primitives.TemplatePrimitiveInjector
+import org.boozallen.plugins.jte.util.TemplateLogger
 import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
 
 /**
@@ -30,9 +31,15 @@ import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
 @Extension class PipelineConfigVariableInjector extends TemplatePrimitiveInjector {
 
     static final String VARIABLE = "pipelineConfig"
+    private static final String TYPE_DISPLAY_NAME = "Pipeline Config"
+    private static final String NAMESPACE_KEY = VARIABLE
 
-    static Class<? extends PrimitiveNamespace> getPrimitiveNamespaceClass(){
-        return Namespace
+    static PrimitiveNamespace createNamespace(){
+        return new Namespace(name: getNamespaceKey(), typeDisplayName: TYPE_DISPLAY_NAME)
+    }
+
+    static String getNamespaceKey(){
+        return NAMESPACE_KEY
     }
 
     @SuppressWarnings('NoDef')
@@ -58,9 +65,17 @@ import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
         @Override void add(TemplatePrimitive primitive){
             pipelineConfig = primitive.getValue()
         }
+
+        @Override
         Set<String> getVariables(){
             return [ VARIABLE ]
         }
+
+        @Override
+        void printAllPrimitives(TemplateLogger logger) {
+            // pipelineConfig is not communicated to users as a primitive
+        }
+
         Object getProperty(String name){
             return pipelineConfig[name]
         }

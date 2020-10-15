@@ -38,9 +38,15 @@ import org.jenkinsci.plugins.workflow.job.WorkflowJob
 @Extension class LibraryStepInjector extends TemplatePrimitiveInjector {
 
     private static final String KEY = "libraries"
+    private static final String TYPE_DISPLAY_NAME = "Library"
+    private static final String NAMESPACE_KEY = KEY
 
-    static Class<? extends PrimitiveNamespace> getPrimitiveNamespaceClass(){
-        return Namespace
+    static PrimitiveNamespace createNamespace(){
+        return new Namespace(name: getNamespaceKey(), typeDisplayName: TYPE_DISPLAY_NAME)
+    }
+
+    static String getNamespaceKey(){
+        return NAMESPACE_KEY
     }
 
     @Override
@@ -103,46 +109,51 @@ import org.jenkinsci.plugins.workflow.job.WorkflowJob
 
     static class Namespace extends PrimitiveNamespace {
         String name = KEY
-        List<Library> libraries = []
+        List<CallableNamespace> libraries = []
+
+        @Override
+        void printAllPrimitives(TemplateLogger logger){
+            logger.print( "created Library Steps:\n" + getFormattedVariables().join("\n") )
+        }
+
         @Override void add(TemplatePrimitive primitive){
             String libName = primitive.getLibrary()
-            Library library = getLibrary(libName)
+            CallableNamespace library = getLibrary(libName)
             if(!library){
-                library = new Library(name: libName)
+                library = new CallableNamespace(name: libName)
                 libraries.push(library)
             }
             library.add(primitive)
         }
+
         @Override Set<String> getVariables(){
             return libraries*.getVariables().flatten() as Set<String>
         }
+
+        Set<String> getFormattedVariables(){
+            return libraries.collect{ lib ->
+                lib.getVariables().collect { var ->
+                    "${var} from the ${lib.name} Library"
+                }
+            }.flatten() as Set<String>
+        }
+
         Object getProperty(String name){
-            Library library = getLibrary(name)
+            MetaProperty meta = getClass().metaClass.getMetaProperty(name)
+            if(meta){
+                return meta.getProperty(this)
+            }
+
+            CallableNamespace library = getLibrary(name)
             if(!library){
                 throw new JTEException("Library ${name} not found.")
             }
             return library
         }
-        private Library getLibrary(String name){
+        private CallableNamespace getLibrary(String name){
             return libraries.find{ l -> l.getName() == name }
         }
-        static class Library extends PrimitiveNamespace{
-            String name
-            List steps = []
-            @Override void add(TemplatePrimitive step){
-                steps.push(step)
-            }
-            @Override Set<String> getVariables(){
-                return steps*.getName() as Set<String>
-            }
-            Object getProperty(String stepName){
-                Object step = steps.find{ s -> s.getName() == stepName }
-                if(!step){
-                    throw new JTEException("JTE Library ${name} does not have step: ${stepName}")
-                }
-                return step
-            }
-        }
+
     }
 
 }

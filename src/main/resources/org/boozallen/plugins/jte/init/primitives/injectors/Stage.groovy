@@ -49,7 +49,14 @@ class Stage extends TemplatePrimitive implements Serializable{
     @SuppressWarnings("MethodParameterTypeRequired")
     void call(args) {
         TemplateLogger.createDuringRun().print "[Stage - ${name}]"
-        StageContext stageContext = new StageContext(name: name, args: args)
+        Map stageArgs
+        if( args instanceof Object[] && 0 < ((Object[])args).length){
+            stageArgs = ((Object[])args)[0]
+        } else {
+            stageArgs = args as Map
+        }
+
+        StageContext stageContext = new StageContext(name: name, args: stageArgs)
         steps.each{ step ->
             def clone = binding.getStep(step).clone()
             clone.setStageContext(stageContext)

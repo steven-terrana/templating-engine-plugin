@@ -20,7 +20,6 @@ import jenkins.model.Jenkins
 import org.boozallen.plugins.jte.init.governance.config.dsl.PipelineConfigurationObject
 import org.boozallen.plugins.jte.init.primitives.PrimitiveNamespace
 import org.boozallen.plugins.jte.init.primitives.TemplateBinding
-import org.boozallen.plugins.jte.init.primitives.TemplatePrimitive
 import org.boozallen.plugins.jte.init.primitives.TemplatePrimitiveInjector
 import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
 
@@ -37,9 +36,15 @@ import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
     }
 
     private static final String KEY = "keywords"
+    private static final String TYPE_DISPLAY_NAME = "Keyword"
+    private static final String NAMESPACE_KEY = KEY
 
-    static Class<? extends PrimitiveNamespace> getPrimitiveNamespaceClass(){
-        return Namespace
+    static PrimitiveNamespace createNamespace(){
+        return new PrimitiveNamespace(name: getNamespaceKey(), typeDisplayName: TYPE_DISPLAY_NAME)
+    }
+
+    static String getNamespaceKey(){
+        return NAMESPACE_KEY
     }
 
     @Override
@@ -52,17 +57,6 @@ import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
                 value: value,
                 injector: this.getClass()
             ))
-        }
-    }
-
-    static class Namespace extends PrimitiveNamespace {
-        String name = KEY
-        String getMissingPropertyMessage(String name){
-            return "Keyword ${name} not found"
-        }
-        @Override void add(TemplatePrimitive primitive){
-            String name = primitive.getName()
-            primitives[name] = primitive.getValue()
         }
     }
 

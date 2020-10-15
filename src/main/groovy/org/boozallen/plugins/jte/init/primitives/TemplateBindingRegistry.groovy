@@ -17,6 +17,7 @@ package org.boozallen.plugins.jte.init.primitives
 
 import hudson.Extension
 import org.boozallen.plugins.jte.util.JTEException
+import org.boozallen.plugins.jte.util.TemplateLogger
 
 /**
  * Stores a run's TemplatePrimitives on individual namespaces for each type of primitive
@@ -56,18 +57,20 @@ class TemplateBindingRegistry implements Serializable{
         return namespace
     }
 
-    void add(Object primitive){
+    void add(TemplatePrimitive primitive){
         // get the injector that created this primitive
         Class<? extends TemplatePrimitiveInjector> injector = primitive.getInjector()
-        // get this injector's PrimitiveNamespace type
-        Class<? extends PrimitiveNamespace> namespaceClass = injector.getPrimitiveNamespaceClass()
+
+        String namespaceKey = injector.getNamespaceKey()
+
         // check if this type of namespace already exists
         PrimitiveNamespace namespace = namespaces.find{ n ->
-            n.getClass() == namespaceClass
+            n.getName() == namespaceKey
         }
+
         // if this namespace does NOT exist - create it.
         if(!namespace){
-            namespace = namespaceClass.getDeclaredConstructor().newInstance()
+            namespace = injector.createNamespace()
             namespaces.push(namespace)
         }
         // add the primitive to the namespace
@@ -88,6 +91,12 @@ class TemplateBindingRegistry implements Serializable{
      */
     boolean isCase(Object o){
         return o in getVariables()
+    }
+
+    void printAllPrimitives(TemplateLogger logger){
+        namespaces.each{ namespace ->
+            namespace.printAllPrimitives(logger)
+        }
     }
 
 }

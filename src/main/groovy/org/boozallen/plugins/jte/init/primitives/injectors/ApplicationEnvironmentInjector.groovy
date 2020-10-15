@@ -36,9 +36,15 @@ import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
     }
 
     static private final String KEY = "application_environments"
+    static private final String TYPE_DISPLAY_NAME =  "Application Environment"
+    static private final String NAMESPACE_KEY = KEY
 
-    static Class<? extends PrimitiveNamespace> getPrimitiveNamespaceClass(){
-        return Namespace
+    static PrimitiveNamespace createNamespace(){
+        return new PrimitiveNamespace(name: getNamespaceKey(), typeDisplayName: TYPE_DISPLAY_NAME)
+    }
+
+    static String getNamespaceKey(){
+        return NAMESPACE_KEY
     }
 
     @SuppressWarnings('NoDef')
@@ -57,13 +63,6 @@ import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
             def next = (index == (createdEnvs.size() - 1)) ? null : createdEnvs[index + 1]
             env.setPrevious(previous)
             env.setNext(next)
-        }
-    }
-
-    static class Namespace extends PrimitiveNamespace {
-        String name = KEY
-        String getMissingPropertyMessage(String name){
-            return "Application Environment ${name} not found"
         }
     }
 

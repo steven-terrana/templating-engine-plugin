@@ -30,9 +30,15 @@ import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
 @Extension class TemplateMethodInjector extends TemplatePrimitiveInjector {
 
     private static final String KEY = "template_methods"
+    private static final String TYPE_DISPLAY_NAME = "Template Method"
+    private static final String NAMESPACE_KEY = KEY
 
-    static Class<? extends PrimitiveNamespace> getPrimitiveNamespaceClass(){
-        return Namespace
+    static PrimitiveNamespace createNamespace(){
+        return new CallableNamespace(name: getNamespaceKey(), typeDisplayName: TYPE_DISPLAY_NAME)
+    }
+
+    static String getNamespaceKey(){
+        return NAMESPACE_KEY
     }
 
     @SuppressWarnings("ParameterName")
@@ -45,13 +51,6 @@ import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
             if(!binding.hasStep(step)){
                 binding.setVariable(step, stepFactory.createNullStep(step, binding))
             }
-        }
-    }
-
-    static class Namespace extends PrimitiveNamespace {
-        String name = KEY
-        String getMissingPropertyMessage(String name){
-            return "Template Method ${name} not found"
         }
     }
 
