@@ -21,6 +21,7 @@ import org.boozallen.plugins.jte.init.primitives.PrimitiveNamespace
 import org.boozallen.plugins.jte.init.primitives.TemplateBinding
 import org.boozallen.plugins.jte.init.primitives.TemplatePrimitive
 import org.boozallen.plugins.jte.init.primitives.TemplatePrimitiveInjector
+import org.boozallen.plugins.jte.util.TemplateLogger
 import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
 
 /**
@@ -68,6 +69,11 @@ import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
         @Override
         Set<String> getVariables(){
             return [ VARIABLE ]
+        }
+
+        @Override
+        void printAllPrimitives(TemplateLogger logger) {
+            // pipelineConfig is not communicated to users as a primitive
         }
 
         Object getProperty(String name){
