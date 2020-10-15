@@ -161,6 +161,7 @@ class TemplateBindingRegistrySpec extends Specification{
 
         then:
         jenkins.assertBuildStatusSuccess(run)
+        jenkins.assertLogContains("exampleLibrary.callNoParam", run)
         jenkins.assertLogContains("step ran", run)
         jenkins.assertLogContains("[JTE][Step - exampleLibrary/callNoParam.call()]", run)
     }
