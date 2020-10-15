@@ -113,7 +113,7 @@ import org.jenkinsci.plugins.workflow.job.WorkflowJob
 
         @Override
         void printAllPrimitives(TemplateLogger logger){
-            logger.print( "Printing names for primitive type: ${getTypeDisplayName()}\n" + getVariablesWithLibraryName().join("\n") )
+            logger.print( "created Library Steps:\n" + getFormattedVariables().join("\n") )
         }
 
         @Override void add(TemplatePrimitive primitive){
@@ -130,9 +130,11 @@ import org.jenkinsci.plugins.workflow.job.WorkflowJob
             return libraries*.getVariables().flatten() as Set<String>
         }
 
-        Set<String> getVariablesWithLibraryName(){
+        Set<String> getFormattedVariables(){
             return libraries.collect{ lib ->
-                lib.getVariables().collect { var -> "${lib.name}.${var}" }
+                lib.getVariables().collect { var ->
+                    "${var} from the ${lib.name} Library"
+                }
             }.flatten() as Set<String>
         }
 
