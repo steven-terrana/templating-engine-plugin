@@ -52,7 +52,7 @@ class PipelineDecoratorSpec extends Specification{
         new PipelineDecorator.JteBlockWrapper([extra:true])
 
         then:
-        thrown(JTEException)
+        thrown(MissingPropertyException)
     }
 
     @WithoutJenkins
