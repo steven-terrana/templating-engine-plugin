@@ -44,4 +44,3 @@ class CallableNamespace extends PrimitiveNamespace{
     }
 
 }
-
