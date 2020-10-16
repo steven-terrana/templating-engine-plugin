@@ -31,7 +31,7 @@ class TemplateBindingSpec extends Specification{
 
     @Shared @ClassRule JenkinsRule jenkins = new JenkinsRule()
 
-    TemplateBinding binding = new TemplateBinding(Mock(FlowExecutionOwner))
+    TemplateBinding binding = new TemplateBinding(Mock(FlowExecutionOwner), false)
 
     /**
      * fake primitive for testing
