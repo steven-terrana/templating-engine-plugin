@@ -86,4 +86,8 @@ class PrimitiveNamespace implements Serializable{
         logger.print( "created ${getTypeDisplayName()}s:\n" + getVariables().join("\n") )
     }
 
+    def getPrimitivesByName(String primitiveName){
+        return primitives.containsKey(primitiveName) ? "${name}.${primitiveName}" : null
+    }
+
 }
