@@ -53,7 +53,6 @@ class TemplateBinding extends Binding implements Serializable{
     void lock(FlowExecutionOwner flowOwner){
         TemplateLogger logger = new TemplateLogger(flowOwner.getListener())
         registry.printAllPrimitives(logger)
-
         locked = true
     }
 
