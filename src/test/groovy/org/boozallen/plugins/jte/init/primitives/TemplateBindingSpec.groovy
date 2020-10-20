@@ -16,6 +16,7 @@
 package org.boozallen.plugins.jte.init.primitives
 
 import com.cloudbees.groovy.cps.NonCPS
+import hudson.model.Result
 import hudson.model.TaskListener
 import org.boozallen.plugins.jte.init.primitives.injectors.StepWrapperFactory
 import org.boozallen.plugins.jte.job.AdHocTemplateFlowDefinition
@@ -83,6 +84,11 @@ class TemplateBindingSpec extends Specification{
      */
     class StepWrapper extends TestPrimitive{}
 
+    TemplateBinding permissiveBinding
+    def setup(){
+        permissiveBinding = new TemplateBinding(Mock(FlowExecutionOwner), true)
+    }
+
     @WithoutJenkins
     def "non-primitive variable set in binding maintains value"(){
         when:
@@ -121,8 +127,19 @@ class TemplateBindingSpec extends Specification{
         binding.setVariable(name, 3)
 
         then:
-        TemplateException ex = thrown()
+        TemplateException ex = thrown(TemplateException)
         assert ex.message == "pre-lock exception"
+    }
+
+    @WithoutJenkins
+    def "permissive mode binding collision pre-lock does not throws pre-lock exception"(){
+        def name = "x"
+        when:
+        permissiveBinding.setVariable(name, new LocalKeyword(name: name))
+        permissiveBinding.setVariable(name, 3)
+
+        then:
+        noExceptionThrown()
     }
 
     @WithoutJenkins
@@ -259,6 +276,42 @@ class TemplateBindingSpec extends Specification{
 
         expect:
         jenkins.assertLogContains("hello", jenkins.buildAndAssertSuccess(job))
+    }
+
+    def "permissive mode binding collision with ReservedVariable pre-lock throws pre-lock exception"(){
+        given:
+        WorkflowJob job = jenkins.createProject(WorkflowJob)
+        String template = """
+echo("jte.stages.broadway")
+jte.stages.broadway
+
+echo("stage: broadway")
+broadway
+"""
+        String config = """
+jte{
+  permissive_initialization = true
+}
+
+stages{
+  broadway{
+    temp_meth1
+  }
+}
+
+keywords{
+  stageContext = "x"
+}
+
+template_methods{
+  temp_meth1
+}
+"""
+        def definition = new AdHocTemplateFlowDefinition(true, template, true, config)
+        job.setDefinition(definition)
+
+        expect:
+        jenkins.assertLogContains("stage context", jenkins.buildAndAssertStatus(Result.FAILURE, job))
     }
 
 }
