@@ -15,7 +15,6 @@
 */
 package org.boozallen.plugins.jte.init.governance.config.dsl
 
-import org.jenkinsci.plugins.workflow.cps.EnvActionImpl
 import org.kohsuke.groovy.sandbox.GroovyInterceptor
 import org.kohsuke.groovy.sandbox.GroovyInterceptor.Invoker
 
@@ -26,9 +25,9 @@ import org.kohsuke.groovy.sandbox.GroovyInterceptor.Invoker
 class DslSandbox extends GroovyInterceptor {
 
     Script script
-    EnvActionImpl env
+    DslEnvVar env
 
-    DslSandbox(Script script, EnvActionImpl env){
+    DslSandbox(Script script, DslEnvVar env){
         this.script = script
         this.env = env
     }
