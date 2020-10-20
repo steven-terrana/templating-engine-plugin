@@ -471,20 +471,21 @@ class TemplateBindingRegistrySpec extends Specification{
 
     @WithoutJenkins
     @Unroll
-    def "overriding autowired variable #var in binding throws exception"(){
+    def "overriding autowired variable #var in binding with permissive: #permissive throws exception"(){
         FlowExecutionOwner run = Mock(FlowExecutionOwner)
         TaskListener listener = Mock(TaskListener)
         listener.getLogger() >> Mock(PrintStream)
         run.getListener() >> listener
 
         given:
-        TemplateBinding binding = new TemplateBinding(run, false)
+        TemplateBinding binding = new TemplateBinding(run, permissive)
         when:
         binding.setVariable(var, "_")
         then:
         thrown(Exception)
         where:
-        var << [ "config", "stageContext", "hookContext", "resource" ]
+        var << [ "config", "stageContext", "hookContext", "resource", "config", "stageContext", "hookContext", "resource" ]
+        permissive << [ false, false, false, false, true, true, true, true]
     }
 
 }
