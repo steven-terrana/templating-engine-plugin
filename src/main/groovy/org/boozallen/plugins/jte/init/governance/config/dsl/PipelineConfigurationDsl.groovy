@@ -40,10 +40,10 @@ class PipelineConfigurationDsl {
         }
 
         PipelineConfigurationObject pipelineConfig = new PipelineConfigurationObject(flowOwner)
-        EnvActionImpl env = EnvActionImpl.forRun(flowOwner.run())
+        DslEnvVar env = new DslEnvVar(flowOwner)
         Binding ourBinding = new Binding(
-                pipelineConfig: pipelineConfig,
-                env: env
+            pipelineConfig: pipelineConfig,
+            env: env
         )
 
         CompilerConfiguration cc = new CompilerConfiguration()
