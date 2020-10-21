@@ -23,11 +23,10 @@ import spock.lang.Specification
 
 class PipelineConfigurationDslSpec extends Specification {
 
+    EnvVars env = GroovyMock(EnvVars)
     PipelineConfigurationDsl dsl = new PipelineConfigurationDsl(GroovyMock(FlowExecutionOwner){
         run() >> GroovyMock(WorkflowRun){
-            getEnvironment(_) >> GroovyMock(EnvVars){
-                get("someField", _) >> "envProperty"
-            }
+            getEnvironment(_) >> env
         }
         asBoolean() >> true
     })
@@ -38,6 +37,7 @@ class PipelineConfigurationDslSpec extends Specification {
 
     def "include Jenkins env var in configuration"(){
         setup:
+        env.get("someField", _) >> "envProperty"
         String config = "a = env.someField"
 
         when:
