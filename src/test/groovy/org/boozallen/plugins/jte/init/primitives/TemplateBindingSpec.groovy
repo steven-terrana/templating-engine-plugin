@@ -20,6 +20,8 @@ import hudson.model.Result
 import hudson.model.TaskListener
 import org.boozallen.plugins.jte.init.primitives.injectors.StepWrapperFactory
 import org.boozallen.plugins.jte.job.AdHocTemplateFlowDefinition
+import org.boozallen.plugins.jte.util.JTEException
+import org.boozallen.plugins.jte.util.TemplateLogger
 import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
 import org.jenkinsci.plugins.workflow.job.WorkflowJob
 import org.junit.ClassRule
@@ -55,11 +57,11 @@ class TemplateBindingSpec extends Specification{
     }
 
     static class TestInjector extends TemplatePrimitiveInjector{
-
+        static String getNamespaceKey(){ return 't'}
     }
 
     static class LocalKeywordInjector extends TemplatePrimitiveInjector{
-
+        static String getNamespaceKey(){ return 'lk'}
     }
 
     static class LocalStepInjector extends TemplatePrimitiveInjector{
@@ -69,8 +71,9 @@ class TemplateBindingSpec extends Specification{
      * mock Keyword primitive for test
      */
     static class LocalKeyword extends TestPrimitive{
+        String value = "dummy value"
         String getValue(){
-            return "dummy value"
+            return value
         }
 
         @Override
@@ -120,7 +123,7 @@ class TemplateBindingSpec extends Specification{
     }
 
     @WithoutJenkins
-    def "binding collision pre-lock throws pre-lock exception"(){
+    def "binding collision pre-lock throws pre-lock exception, if not permissive"(){
         def name = "x"
         when:
         binding.setVariable(name, new LocalKeyword(name: name))
@@ -132,7 +135,7 @@ class TemplateBindingSpec extends Specification{
     }
 
     @WithoutJenkins
-    def "permissive mode binding collision pre-lock does not throws pre-lock exception"(){
+    def "permissive mode binding collision does not throws pre-lock exception"(){
         def name = "x"
         when:
         permissiveBinding.setVariable(name, new LocalKeyword(name: name))
@@ -140,6 +143,29 @@ class TemplateBindingSpec extends Specification{
 
         then:
         noExceptionThrown()
+    }
+
+    @WithoutJenkins
+    def "getVariable with permissive double assignment throws exception after lock"(){
+        def run = Mock(FlowExecutionOwner)
+        def listener = Mock(TaskListener)
+        listener.getLogger() >> Mock(PrintStream)
+        run.getListener() >> listener
+
+        GroovyMock(TemplateLogger, global: true)
+        TemplateLogger.createDuringRun() >> Mock(TemplateLogger) {
+                printError(_) >> { return }
+        }
+
+        when:
+        permissiveBinding.setVariable("x", new LocalKeyword(name: 'x'))
+        permissiveBinding.setVariable("x", new TestPrimitive(name: 'x', injector: TestInjector))
+        permissiveBinding.lock(run)
+        permissiveBinding.getVariable('x')
+
+        then:
+        JTEException e = thrown(JTEException)
+        e.message.contains("Attempted to access an overloaded primitive: x")
     }
 
     @WithoutJenkins
@@ -278,14 +304,10 @@ class TemplateBindingSpec extends Specification{
         jenkins.assertLogContains("hello", jenkins.buildAndAssertSuccess(job))
     }
 
-    def "permissive mode binding collision with ReservedVariable pre-lock throws pre-lock exception"(){
+    def "permissive mode binding collision with ReservedVariable (stageContext) pre-lock throws pre-lock exception"(){
         given:
         WorkflowJob job = jenkins.createProject(WorkflowJob)
         String template = """
-echo("jte.stages.broadway")
-jte.stages.broadway
-
-echo("stage: broadway")
 broadway
 """
         String config = """
@@ -311,7 +333,7 @@ template_methods{
         job.setDefinition(definition)
 
         expect:
-        jenkins.assertLogContains("stage context", jenkins.buildAndAssertStatus(Result.FAILURE, job))
+        jenkins.assertLogContains("is reserved for steps to access their stage context", jenkins.buildAndAssertStatus(Result.FAILURE, job))
     }
 
 }

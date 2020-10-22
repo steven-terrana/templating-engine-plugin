@@ -344,6 +344,30 @@ class TemplateBindingRegistrySpec extends Specification{
         jenkins.assertBuildStatus(Result.FAILURE, run)
     }
 
+    def "step override during initialization success with permissive_initialization"(){
+        given:
+        def run
+        WorkflowJob job = TestUtil.createAdHoc(jenkins, config: """
+            jte{
+                permissive_initialization = true
+            }
+            libraries{
+                exampleLibrary
+            }
+            keywords{
+                callNoParam = "oops"
+            }
+            """,
+                template: 'println "doesnt matter"'
+        )
+
+        when:
+        run = job.scheduleBuild2(0).get()
+
+        then:
+        jenkins.assertBuildStatus(Result.SUCCESS, run)
+    }
+
     def "step override post initialization throws exception"(){
         given:
         def run
