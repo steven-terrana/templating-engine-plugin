@@ -16,7 +16,6 @@
 package org.boozallen.plugins.jte.init.governance.config.dsl
 
 import hudson.EnvVars
-import org.jenkinsci.plugins.workflow.cps.EnvActionImpl
 import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner
 import org.jenkinsci.plugins.workflow.job.WorkflowRun
 import spock.lang.Specification
@@ -30,10 +29,6 @@ class PipelineConfigurationDslSpec extends Specification {
         }
         asBoolean() >> true
     })
-
-    def setup(){
-
-    }
 
     def "include Jenkins env var in configuration"(){
         setup:

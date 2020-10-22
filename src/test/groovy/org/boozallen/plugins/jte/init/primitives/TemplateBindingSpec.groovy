@@ -57,11 +57,11 @@ class TemplateBindingSpec extends Specification{
     }
 
     static class TestInjector extends TemplatePrimitiveInjector{
-        static String getNamespaceKey(){ return 't'}
+        static String getNamespaceKey(){ return 't' }
     }
 
     static class LocalKeywordInjector extends TemplatePrimitiveInjector{
-        static String getNamespaceKey(){ return 'lk'}
+        static String getNamespaceKey(){ return 'lk' }
     }
 
     static class LocalStepInjector extends TemplatePrimitiveInjector{
@@ -153,9 +153,7 @@ class TemplateBindingSpec extends Specification{
         run.getListener() >> listener
 
         GroovyMock(TemplateLogger, global: true)
-        TemplateLogger.createDuringRun() >> Mock(TemplateLogger) {
-                printError(_) >> { return }
-        }
+        TemplateLogger.createDuringRun() >> Mock(TemplateLogger)
 
         when:
         permissiveBinding.setVariable("x", new LocalKeyword(name: 'x'))

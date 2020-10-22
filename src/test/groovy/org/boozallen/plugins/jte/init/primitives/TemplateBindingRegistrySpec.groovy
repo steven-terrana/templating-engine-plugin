@@ -357,8 +357,7 @@ class TemplateBindingRegistrySpec extends Specification{
             keywords{
                 callNoParam = "oops"
             }
-            """,
-                template: 'println "doesnt matter"'
+            """, template: 'println "doesnt matter"'
         )
 
         when:
