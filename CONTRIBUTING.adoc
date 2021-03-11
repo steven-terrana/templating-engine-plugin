@@ -39,3 +39,12 @@ To run tests for a specific Class, `StepWrapperSpec` for example, run:
 ----
 just test '*.StepWrapperSpec'
 ----
+
+## Building the JPI
+
+To build the JPI, run: 
+
+[source, bash]
+----
+just jpi
+----
