@@ -1,0 +1,41 @@
+:toc:
+
+# Contributors Guide
+
+## Local Environment
+
+.Tools
+|===
+| Tool | Purpose
+
+| https://gradle.org[Gradle]
+| Used to run unit tests, package the JPI, and publish the plugin
+
+| https://github.com/casey/just[Just]
+| A task runner. Used here to automate common commands used during development.
+
+| https://www.docker.com/get-started[Docker]
+| Used to run a local Jenkins instance for testing.
+
+|===
+
+
+## Running Tests
+
+### Execute all the tests
+
+To run all the tests, run: 
+
+[source,bash]
+----
+just test
+----
+
+### Execute tests for a specific class
+
+To run tests for a specific Class, `StepWrapperSpec` for example, run:
+
+[source,bash]
+----
+just test '*.StepWrapperSpec'
+----
