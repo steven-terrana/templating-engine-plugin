@@ -65,9 +65,11 @@ class StepWrapperCPS extends StepWrapper{
                 Hooks.invoke(BeforeStep, context)
                 TemplateLogger.createDuringRun().print "[Step - ${getLibrary()}/${getName()}.${methodName}(${argsList})]"
                 result = InvokerHelper.getMetaClass(getScript()).invokeMethod(getScript(), methodName, args)
-            } catch (x) {
-                throw new InvokerInvocationException(x)
+            } catch (error) {
+                context.setHookStatus(new HookContext.HookStatus(error))
+                throw new InvokerInvocationException(error)
             } finally{
+                // has the message changed?
                 Hooks.invoke(AfterStep, context)
                 Hooks.invoke(Notify, context)
             }
