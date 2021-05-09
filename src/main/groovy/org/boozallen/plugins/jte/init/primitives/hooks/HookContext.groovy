@@ -49,7 +49,11 @@ class HookContext implements Serializable{
      */
     HookStatus hookStatus = new HookStatus()
 
+    @SuppressWarnings("EqualsAndHashCode")
     static class HookStatus implements Serializable{
+
+        private static final long serialVersionUID = 1L
+
         // null unless FAILURE
         Exception exception
 
@@ -61,16 +65,13 @@ class HookContext implements Serializable{
             switch(o){
                 case "SUCCESS": // successful if there are no messages or exception
                     return !exception && !getWarnings()
-                    break
                 case "FAILURE": // if there's an exception the step failed
                     return exception as boolean
-                    break
                 case "UNSTABLE": // unstable if there are warnings but no exception
                     return getWarnings() && !exception
                 case o instanceof HookStatus:
                     HookStatus obj = o as HookStatus
                     return (this.getException() == obj.getException() && this.getWarnings() == obj.getWarnings())
-                    break;
                 default:
                     return false
             }
@@ -92,7 +93,7 @@ class HookContext implements Serializable{
             })
             // aggregate the warning messages
             List<String> warnings = []
-            nodes.collect(warnings){node ->
+            nodes.collect(warnings){ node ->
                 node.getAction(WarningAction).getMessage()
             }
             return warnings
